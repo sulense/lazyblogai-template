@@ -1,0 +1,264 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-color: #8b5cf6;
+  --font-family-main: 'Inter', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Dark mode (default) */
+html.dark body {
+  background-color: #0a0a0b;
+  color: #e5e5e5;
+}
+
+html.dark .bg-site {
+  background-color: #0a0a0b;
+}
+
+html.dark .text-site {
+  color: #e5e5e5;
+}
+
+html.dark .text-site-muted {
+  color: #9ca3af;
+}
+
+html.dark .bg-header {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark .bg-footer {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark .article-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+html.dark .article-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 20px 40px -20px rgba(139, 92, 246, 0.2);
+}
+
+html.dark .glass {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+html.dark .prose {
+  color: #d1d5db;
+}
+
+html.dark .prose h1,
+html.dark .prose h2,
+html.dark .prose h3 {
+  color: #fff;
+}
+
+/* Light mode */
+html.light body {
+  background-color: #f8fafc;
+  color: #1f2937;
+}
+
+html.light .bg-site {
+  background-color: #f8fafc;
+}
+
+html.light .text-site {
+  color: #1f2937;
+}
+
+html.light .text-site-muted {
+  color: #6b7280;
+}
+
+html.light .bg-header {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+html.light .bg-footer {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+html.light .article-card {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+html.light .article-card:hover {
+  background: #fff;
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 20px 40px -20px rgba(139, 92, 246, 0.15);
+}
+
+html.light .glass {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+html.light .prose {
+  color: #374151;
+}
+
+html.light .prose h1,
+html.light .prose h2,
+html.light .prose h3 {
+  color: #111827;
+}
+
+html.light .prose strong {
+  color: #111827;
+}
+
+/* Override Tailwind prose dark styles for light mode */
+html.light .prose-invert {
+  --tw-prose-body: #374151;
+  --tw-prose-headings: #111827;
+  --tw-prose-links: var(--primary-color);
+  --tw-prose-bold: #111827;
+  --tw-prose-counters: #6b7280;
+  --tw-prose-bullets: #9ca3af;
+  --tw-prose-hr: #e5e7eb;
+  --tw-prose-quotes: #111827;
+  --tw-prose-quote-borders: #e5e7eb;
+  --tw-prose-captions: #6b7280;
+  --tw-prose-code: #111827;
+  --tw-prose-pre-code: #e5e7eb;
+  --tw-prose-pre-bg: #1f2937;
+  --tw-prose-th-borders: #d1d5db;
+  --tw-prose-td-borders: #e5e7eb;
+}
+
+html.light .text-white {
+  color: #111827 !important;
+}
+
+html.light .text-gray-300,
+html.light .text-gray-400,
+html.light .text-gray-500 {
+  color: #6b7280 !important;
+}
+
+html.light .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light .bg-white\/5 {
+  background: rgba(0, 0, 0, 0.03) !important;
+}
+
+html.light .bg-black\/40,
+html.light .bg-black\/30 {
+  background: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Ambient background for light mode */
+html.light .ambient-bg {
+  opacity: 0.08;
+}
+
+html.dark .ambient-bg {
+  opacity: 0.2;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* Article card hover effects */
+.article-card {
+  transition: all 0.3s ease;
+}
+
+.article-card:hover {
+  transform: translateY(-4px);
+}
+
+/* Prose styling for blog content */
+.prose {
+  line-height: 1.8;
+}
+
+.prose a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.prose a:hover {
+  text-decoration: underline;
+}
+
+.prose code {
+  background: rgba(139, 92, 246, 0.1);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary-color), #ec4899, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass effect */
+.glass {
+  backdrop-filter: blur(12px);
+}
+
+/* Scrollbar - Dark */
+html.dark ::-webkit-scrollbar {
+  width: 8px;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #1a1a1b;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+/* Scrollbar - Light */
+html.light ::-webkit-scrollbar {
+  width: 8px;
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
