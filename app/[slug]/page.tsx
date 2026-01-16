@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { ArticleSchema, BreadcrumbSchema } from "../../components/structured-data";
 import { Metadata } from "next";
+import { renderSections, Section } from "../../components/sections";
 
 export const revalidate = 60;
 
@@ -33,8 +34,41 @@ interface Post {
     is_published: boolean;
 }
 
+interface StaticPage {
+    id: string;
+    title: string;
+    slug: string;
+    page_type: string;
+    sections: Section[];
+    meta_title: string | null;
+    meta_description: string | null;
+    og_image: string | null;
+    is_published: boolean;
+}
+
 interface Props {
     params: { slug: string };
+}
+
+// Check if slug is a static page first
+async function getPage(slug: string): Promise<StaticPage | null> {
+    const siteId = process.env.SITE_ID;
+    if (!siteId || !process.env.NEXT_PUBLIC_SUPABASE_URL) return null;
+
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+        .from('site_pages')
+        .select('*')
+        .eq('site_id', siteId)
+        .eq('slug', slug)
+        .eq('is_published', true)
+        .single();
+
+    if (error || !data) return null;
+    return {
+        ...data,
+        sections: (data.sections || []) as Section[],
+    };
 }
 
 async function getPost(slug: string): Promise<Post | null> {
@@ -55,8 +89,21 @@ async function getPost(slug: string): Promise<Post | null> {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    // Check for page first
+    const page = await getPage(params.slug);
+    if (page) {
+        return {
+            title: page.meta_title || page.title,
+            description: page.meta_description || undefined,
+            openGraph: page.og_image ? {
+                images: [{ url: page.og_image }],
+            } : undefined,
+        };
+    }
+
+    // Fall back to post
     const post = await getPost(params.slug);
-    if (!post) return { title: "Post Not Found" };
+    if (!post) return { title: "Not Found" };
 
     const title = post.meta_title || post.title;
     const description = post.meta_description || post.excerpt || post.content?.substring(0, 155) || '';
@@ -98,9 +145,20 @@ function extractHeadings(content: string): { id: string; text: string }[] {
     return headings;
 }
 
-export default async function BlogPostPage({ params }: Props) {
-    const post = await getPost(params.slug);
+export default async function SlugPage({ params }: Props) {
+    // Check if this is a static page (About, Contact, Privacy, Terms, etc.)
+    const page = await getPage(params.slug);
+    if (page) {
+        // Render the static page using sections
+        return (
+            <main className="min-h-screen">
+                {renderSections(page.sections)}
+            </main>
+        );
+    }
 
+    // Fall back to blog post
+    const post = await getPost(params.slug);
     if (!post) {
         notFound();
     }
