@@ -76,9 +76,9 @@ export function StatsBar({
 
     return (
         <section className={`
-            relative py-12 lg:py-16 overflow-hidden
+            relative py-20 lg:py-28 overflow-hidden
             ${isFloating
-                ? 'py-20 bg-transparent'
+                ? 'py-32 bg-transparent'
                 : 'border-y border-white/5 bg-white/[0.02] backdrop-blur-sm'
             }
         `}>

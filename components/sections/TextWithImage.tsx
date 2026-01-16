@@ -22,7 +22,7 @@ export function TextWithImage({
     const isCard = layout === 'card';
 
     return (
-        <section className="py-24 px-6 relative overflow-hidden bg-black">
+        <section className="py-32 px-6 relative overflow-hidden bg-black">
             {/* Background Decorations */}
             {!isOverlap && (
                 <div className="absolute inset-0 pointer-events-none overflow-hidden">

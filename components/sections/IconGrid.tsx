@@ -25,7 +25,7 @@ export function IconGrid({
         : 'grid-cols-1 md:grid-cols-3';
 
     return (
-        <section className="py-24 px-6 relative overflow-hidden">
+        <section className="py-32 px-6 relative overflow-hidden">
             {/* Cinematic Noise Background */}
             <div className="absolute inset-0 bg-noise opacity-[0.03] pointer-events-none" />
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-purple-500/10 blur-[120px] rounded-full pointer-events-none" />
