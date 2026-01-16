@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useState, useRef } from 'react';
-import React from 'react';
 
 interface StatItem {
     value: string;
     label: string;
-    icon?: React.ReactNode;
+    icon?: string;
 }
 
 interface StatsBarProps {
@@ -69,48 +68,29 @@ function CountingNumber({ value }: { value: string }) {
 export function StatsBar({
     title,
     stats,
-    background = 'gradient',
     layout = 'standard',
 }: StatsBarProps) {
     const isFloating = layout === 'floating';
 
     return (
-        <section className={`
-            relative py-20 lg:py-28 overflow-hidden
-            ${isFloating
-                ? 'py-32 bg-transparent'
-                : 'border-y border-white/10 bg-white/[0.03] backdrop-blur-md shadow-2xl'
-            }
-        `}>
-            {/* Ambient Background Glow for Standard Layout */}
-            {!isFloating && (
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[200px] bg-purple-500/10 blur-[80px] rounded-full" />
-                </div>
-            )}
-
-            <div className={`max-w-7xl mx-auto px-6 relative z-10`}>
+        <section className={`py-16 md:py-20 px-6 ${isFloating ? 'bg-transparent' : 'bg-gray-900 border-y border-gray-800'}`}>
+            <div className="max-w-6xl mx-auto">
                 {title && (
-                    <h2 className="text-2xl font-bold text-white text-center mb-12 uppercase tracking-widest opacity-80">
+                    <h2 className="text-xl font-semibold text-white text-center mb-12 uppercase tracking-wider">
                         {title}
                     </h2>
                 )}
 
                 <div className={`
-                    grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12
-                    ${isFloating ? 'bg-black/80 backdrop-blur-xl rounded-3xl p-12 border border-white/10 shadow-2xl' : ''}
+                    grid grid-cols-2 md:grid-cols-4 gap-8
+                    ${isFloating ? 'bg-gray-900/80 backdrop-blur border border-gray-800 rounded-2xl p-8 md:p-12' : ''}
                 `}>
                     {stats.map((stat, index) => (
-                        <div
-                            key={index}
-                            className={`flex flex-col items-center justify-center text-center space-y-2 group
-                                ${!isFloating && index !== stats.length - 1 ? 'lg:border-r lg:border-white/5' : ''}
-                            `}
-                        >
-                            <div className="text-4xl lg:text-5xl font-bold font-mono tracking-tighter text-white tabular-nums group-hover:scale-110 transition-transform duration-300">
+                        <div key={index} className="text-center">
+                            <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2">
                                 <CountingNumber value={stat.value} />
                             </div>
-                            <div className="text-sm uppercase tracking-widest text-purple-400 font-semibold opacity-80 group-hover:opacity-100 transition-opacity">
+                            <div className="text-sm text-purple-400 font-medium uppercase tracking-wider">
                                 {stat.label}
                             </div>
                         </div>

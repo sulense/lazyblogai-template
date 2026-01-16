@@ -1,6 +1,6 @@
 interface TextBlockProps {
     title?: string;
-    content: string; // HTML content
+    content: string;
     max_width?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
 }
 
@@ -18,31 +18,24 @@ export function TextBlock({
     }[max_width];
 
     return (
-        <section className="relative py-24 md:py-32 px-6 overflow-hidden bg-black">
-            {/* Background Texture */}
-            <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute inset-0 bg-noise opacity-[0.05]" />
-                <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white/[0.02] to-transparent" />
-            </div>
-
-            <div className={`relative z-10 mx-auto ${widthClass}`}>
-                {/* Visual Container Card */}
-                <div className="bg-white/[0.02] backdrop-blur-sm border border-white/10 p-8 md:p-14 rounded-3xl shadow-2xl">
+        <section className="py-20 md:py-28 px-6 bg-gray-950">
+            <div className={`mx-auto ${widthClass}`}>
+                {/* Content Card */}
+                <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-8 md:p-12 lg:p-16">
                     {title && (
-                        <h2 className="text-3xl md:text-5xl font-bold text-white mb-10 tracking-tight border-b border-white/10 pb-8">
+                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-8 pb-6 border-b border-gray-800">
                             {title}
                         </h2>
                     )}
 
                     <div
-                        className="prose prose-lg md:prose-xl prose-invert max-w-none 
-                            prose-headings:text-white prose-headings:font-bold prose-headings:tracking-tight
-                            prose-p:text-gray-300 prose-p:leading-loose
-                            prose-a:text-purple-400 hover:prose-a:text-purple-300 prose-a:transition-colors
-                            prose-strong:text-white prose-strong:font-semibold
+                        className="prose prose-lg prose-invert max-w-none 
+                            prose-headings:text-white prose-headings:font-semibold
+                            prose-p:text-gray-300 prose-p:leading-relaxed
+                            prose-a:text-purple-400 hover:prose-a:text-purple-300
+                            prose-strong:text-white
                             prose-ul:text-gray-300 prose-ol:text-gray-300
-                            prose-li:marker:text-purple-500
-                            prose-blockquote:border-l-purple-500 prose-blockquote:bg-white/5 prose-blockquote:p-6 prose-blockquote:rounded-r-lg"
+                            prose-li:marker:text-purple-400"
                         dangerouslySetInnerHTML={{ __html: content }}
                     />
                 </div>
