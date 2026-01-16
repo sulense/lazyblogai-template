@@ -5,6 +5,9 @@ import { Metadata } from "next";
 import { OrganizationSchema, WebSiteSchema } from "../components/structured-data";
 import { ThemeToggle } from "../components/ThemeToggle";
 
+// Revalidate layout data (SEO settings, logo, etc.) every 60 seconds
+export const revalidate = 60;
+
 // Font configurations
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const roboto = Roboto({ weight: ["400", "700"], subsets: ["latin"], variable: "--font-roboto" });
