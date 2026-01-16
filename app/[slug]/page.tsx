@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
-import { ArticleSchema, BreadcrumbSchema } from "../../components/structured-data";
+import { ArticleSchema, BreadcrumbSchema, AuthorSchema } from "../../components/structured-data";
 import { Metadata } from "next";
 
 export const revalidate = 60;
@@ -33,6 +33,15 @@ interface Post {
     is_published: boolean;
 }
 
+interface RelatedPost {
+    id: string;
+    title: string;
+    slug: string;
+    featured_image: string | null;
+    category: string;
+    read_time: string;
+}
+
 interface Props {
     params: { slug: string };
 }
@@ -52,6 +61,24 @@ async function getPost(slug: string): Promise<Post | null> {
 
     if (error || !data) return null;
     return data;
+}
+
+async function getRelatedPosts(category: string, excludeSlug: string): Promise<RelatedPost[]> {
+    const siteId = process.env.SITE_ID;
+    if (!siteId || !process.env.NEXT_PUBLIC_SUPABASE_URL) return [];
+
+    const supabase = getSupabase();
+    const { data } = await supabase
+        .from('posts')
+        .select('id, title, slug, featured_image, category, read_time')
+        .eq('site_id', siteId)
+        .eq('is_published', true)
+        .eq('category', category)
+        .neq('slug', excludeSlug)
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+    return data || [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -87,6 +114,9 @@ export default async function SlugPage({ params }: Props) {
     if (!post) {
         notFound();
     }
+
+    // Fetch related posts from same category
+    const relatedPosts = await getRelatedPosts(post.category, post.slug);
 
     // Inject IDs into H2 tags for TOC navigation
     const processContent = (htmlContent: string) => {
@@ -333,6 +363,46 @@ export default async function SlugPage({ params }: Props) {
                                         View all articles
                                     </button>
                                 </div>
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Related Posts */}
+                    {relatedPosts.length > 0 && (
+                        <section className="mt-16" aria-labelledby="related-heading">
+                            <h2 id="related-heading" className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+                                <span className="w-1 h-8 rounded-full bg-purple-500" />
+                                Related Articles
+                            </h2>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {relatedPosts.map((related) => (
+                                    <Link key={related.id} href={`/${related.slug}`} className="group block">
+                                        <article className="space-y-3">
+                                            <div className="aspect-[16/10] rounded-xl overflow-hidden relative">
+                                                {related.featured_image ? (
+                                                    <Image
+                                                        src={related.featured_image}
+                                                        alt={related.title}
+                                                        fill
+                                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                                        sizes="(max-width: 768px) 100vw, 33vw"
+                                                    />
+                                                ) : (
+                                                    <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900" />
+                                                )}
+                                            </div>
+                                            <div className="space-y-1">
+                                                <span className="text-xs font-medium text-purple-400 uppercase tracking-wider">
+                                                    {related.category}
+                                                </span>
+                                                <h3 className="text-lg font-semibold text-white group-hover:text-purple-300 transition-colors line-clamp-2">
+                                                    {related.title}
+                                                </h3>
+                                                <span className="text-sm text-gray-500">{related.read_time}</span>
+                                            </div>
+                                        </article>
+                                    </Link>
+                                ))}
                             </div>
                         </section>
                     )}

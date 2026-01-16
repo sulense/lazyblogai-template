@@ -28,7 +28,7 @@ async function getSiteConfig() {
 
     const { data: site } = await supabase
         .from("sites")
-        .select("primary_color, font_family, name, slug, custom_domain")
+        .select("primary_color, font_family, name, slug, custom_domain, google_site_verification_id")
         .eq("id", siteId)
         .single();
 
@@ -56,6 +56,11 @@ export async function generateMetadata(): Promise<Metadata> {
         metadataBase: new URL(siteUrl),
         alternates: {
             canonical: siteUrl,
+            types: {
+                'application/rss+xml': `${siteUrl}/rss.xml`,
+                'application/atom+xml': `${siteUrl}/atom.xml`,
+                'application/feed+json': `${siteUrl}/feed.json`,
+            },
         },
         openGraph: {
             title: seo?.meta_title || site?.name || "Niche Blog",
@@ -83,7 +88,7 @@ export async function generateMetadata(): Promise<Metadata> {
         },
         manifest: "/manifest.json",
         verification: {
-            google: seo?.google_site_verification,
+            google: site?.google_site_verification_id,
         },
     };
 }
@@ -120,6 +125,10 @@ export default async function RootLayout({ children }: RootLayoutProps) {
     return (
         <html lang="en" className={fontVariable} suppressHydrationWarning>
             <head>
+                <link rel="icon" href={seo?.favicon_url || "/favicon.ico"} />
+                {site?.google_site_verification_id && (
+                    <meta name="google-site-verification" content={site.google_site_verification_id} />
+                )}
                 {/* Theme initialization script to prevent FOUC */}
                 <script dangerouslySetInnerHTML={{
                     __html: `
@@ -202,6 +211,11 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 
                             <div className="flex items-center gap-4">
                                 <ThemeToggle />
+                                <a href="/search" className="p-2 text-gray-400 hover:text-white transition-colors" aria-label="Search">
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </a>
                                 <button
                                     className="px-5 py-2.5 rounded-full text-sm font-semibold text-white transition-all hover:opacity-90 shadow-lg hover:shadow-xl hover:scale-105"
                                     style={{ background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}cc)` }}

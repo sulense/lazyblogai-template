@@ -105,6 +105,42 @@ export function ArticleSchema({
     );
 }
 
+interface AuthorSchemaProps {
+    name: string;
+    url?: string;
+    image?: string;
+    description?: string;
+    sameAs?: string[];
+    jobTitle?: string;
+}
+
+export function AuthorSchema({
+    name,
+    url,
+    image,
+    description,
+    sameAs,
+    jobTitle,
+}: AuthorSchemaProps) {
+    const schema = {
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name,
+        ...(url && { url }),
+        ...(image && { image }),
+        ...(description && { description }),
+        ...(jobTitle && { jobTitle }),
+        ...(sameAs && sameAs.length > 0 && { sameAs }),
+    };
+
+    return (
+        <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+    );
+}
+
 interface BreadcrumbItem {
     name: string;
     url: string;

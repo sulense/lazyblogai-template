@@ -25,25 +25,45 @@ interface Post {
     is_published: boolean;
 }
 
-export default async function Page() {
+import { Pagination } from "../components/pagination";
+
+export default async function Page({ searchParams }: { searchParams: { page?: string } }) {
     const siteId = process.env.SITE_ID;
     const isDemo = !siteId || !process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const page = parseInt(searchParams.page || '1');
+    const pageSize = 9;
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
 
     let posts: Post[] = [];
+    let count = 0;
 
     if (!isDemo) {
         const supabase = getSupabase();
+
+        // Get total count
+        const { count: totalCount } = await supabase
+            .from('posts')
+            .select('*', { count: 'exact', head: true })
+            .eq('site_id', siteId)
+            .eq('is_published', true);
+
+        count = totalCount || 0;
+
+        // Get paginated posts
         const { data, error } = await supabase
             .from('posts')
             .select('id, title, slug, excerpt, featured_image, category, read_time, author_name, author_avatar, created_at, is_published')
             .eq('site_id', siteId)
             .eq('is_published', true)
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .range(from, to);
 
         if (!error && data) {
             posts = data;
         }
     } else {
+
         // Demo posts for preview mode
         posts = [
             {
@@ -125,7 +145,10 @@ export default async function Page() {
                 is_published: true,
             },
         ];
+        count = posts.length;
     }
+
+    const totalPages = Math.ceil(count / pageSize);
 
     // Derive categories dynamically from posts
     const uniqueCategories = Array.from(new Set(posts.map(p => p.category))).filter(Boolean).sort();
@@ -331,6 +354,12 @@ export default async function Page() {
                                         </Link>
                                     ))}
                                 </div>
+
+                                <Pagination
+                                    currentPage={page}
+                                    totalPages={totalPages}
+                                    baseUrl="/"
+                                />
                             </section>
                         </div>
                     )}

@@ -10,11 +10,26 @@ export const config = {
          * 4. all root files inside /public (e.g. /favicon.ico)
          */
         "/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)",
+        // Also match Google verification files
+        "/google:path*.html",
     ],
 };
 
 export default async function middleware(req: NextRequest) {
     const url = req.nextUrl;
+    const pathname = url.pathname;
+
+    // Handle Google Site Verification files
+    // Pattern: /googleXXXXXXXXXXXX.html
+    if (pathname.startsWith('/google') && pathname.endsWith('.html')) {
+        const filename = pathname.slice(1); // Remove leading slash
+        console.log('[Middleware] Intercepting Google verification file:', filename);
+
+        // Rewrite to the API endpoint
+        const verifyUrl = new URL('/api/google-verify', req.url);
+        verifyUrl.searchParams.set('file', filename);
+        return NextResponse.rewrite(verifyUrl);
+    }
 
     // Get hostname (e.g. 'demo.vercel.app' or 'custom.com')
     const hostname = req.headers.get("host");
@@ -61,3 +76,4 @@ export default async function middleware(req: NextRequest) {
         },
     });
 }
+
