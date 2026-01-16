@@ -12,6 +12,7 @@ interface StatsBarProps {
     title?: string;
     stats: StatItem[];
     background?: 'gradient' | 'dark' | 'transparent';
+    layout?: 'standard' | 'floating';
 }
 
 function CountingNumber({ value }: { value: string }) {
@@ -69,44 +70,49 @@ export function StatsBar({
     title,
     stats,
     background = 'gradient',
+    layout = 'standard',
 }: StatsBarProps) {
+    const isFloating = layout === 'floating';
+
     const bgClass = {
         gradient: 'bg-gradient-to-r from-purple-900 via-indigo-900 to-blue-900',
         dark: 'bg-black/40 backdrop-blur-md',
         transparent: 'bg-transparent',
-    }[background];
+    }[isFloating ? 'transparent' : background];
 
     return (
         <section className={`py-12 border-y border-white/5 relative overflow-hidden ${bgClass}`}>
             {/* Ambient Glow */}
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-50" />
+            {!isFloating && <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-50" />}
 
-            <div className="max-w-7xl mx-auto px-6 relative z-10">
-                {title && (
-                    <h2 className="text-2xl font-bold text-white text-center mb-12 uppercase tracking-widest opacity-80">
-                        {title}
-                    </h2>
-                )}
+            <div className={`max-w-7xl mx-auto px-6 relative z-10 ${isFloating ? '-mt-24 mb-12' : ''}`}>
+                <div className={`${isFloating ? 'bg-black/80 backdrop-blur-xl rounded-3xl p-12 border border-white/10 shadow-2xl shadow-purple-900/20' : ''}`}>
+                    {title && (
+                        <h2 className="text-2xl font-bold text-white text-center mb-12 uppercase tracking-widest opacity-80">
+                            {title}
+                        </h2>
+                    )}
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 divide-x divide-white/10">
-                    {stats.map((stat, index) => (
-                        <div
-                            key={index}
-                            className={`text-center space-y-2 p-4 ${index % 2 !== 0 ? 'md:border-none' : ''}`} // Reset borders for mobile grid logic if needed, but simple divide-x works for row
-                        >
-                            {stat.icon && (
-                                <div className="text-4xl mb-4 animate-float" style={{ animationDelay: `${index * 0.5}s` }}>
-                                    {stat.icon}
+                    <div className={`grid grid-cols-2 md:grid-cols-4 gap-8 ${!isFloating ? 'divide-x divide-white/10' : ''}`}>
+                        {stats.map((stat, index) => (
+                            <div
+                                key={index}
+                                className={`text-center space-y-2 p-4 ${(index % 2 !== 0 && !isFloating) ? 'md:border-none' : ''}`}
+                            >
+                                {stat.icon && (
+                                    <div className="text-4xl mb-4 animate-float" style={{ animationDelay: `${index * 0.5}s` }}>
+                                        {stat.icon}
+                                    </div>
+                                )}
+                                <div className="text-4xl md:text-6xl font-black bg-gradient-to-br from-white to-purple-200 bg-clip-text text-transparent">
+                                    <CountingNumber value={stat.value} />
                                 </div>
-                            )}
-                            <div className="text-4xl md:text-5xl font-black bg-gradient-to-br from-white to-purple-200 bg-clip-text text-transparent">
-                                <CountingNumber value={stat.value} />
+                                <div className="text-sm font-medium text-purple-300 uppercase tracking-widest">
+                                    {stat.label}
+                                </div>
                             </div>
-                            <div className="text-sm font-medium text-purple-300 uppercase tracking-widest">
-                                {stat.label}
-                            </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>
