@@ -26,60 +26,87 @@ export function TextWithImage({
             <div className={`max-w-7xl mx-auto ${isOverlap ? 'relative' : ''}`}>
                 <div className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ${isImageLeft ? 'lg:flex-row-reverse' : ''}`}>
 
-                    {/* Text Content */}
-                    <div className={`
-                        space-y-8 animate-fadeInUp 
-                        ${isImageLeft ? (isOverlap ? 'lg:order-2 lg:-ml-24 z-10' : 'lg:order-2') : (isOverlap ? 'lg:order-1 lg:-mr-24 z-10' : 'lg:order-1')}
-                        ${isOverlap ? 'bg-black/80 backdrop-blur-xl p-8 md:p-12 rounded-3xl border border-white/10 shadow-2xl' : ''}
+                    {/* Background Decorations for Standard Layout */}
+                    {!isOverlap && (
+                        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                            <div className="absolute top-1/2 left-0 w-[50vw] h-[50vw] bg-purple-500/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-[-20%]" />
+                            <div className="absolute bottom-0 right-0 w-[40vw] h-[40vw] bg-blue-500/10 rounded-full blur-[100px] translate-y-[20%] translate-x-[20%]" />
+                            <div className="absolute inset-0 bg-noise opacity-[0.03]" />
+                        </div>
+                    )}
+
+                    <div className="relative z-10 max-w-7xl mx-auto">
+                        <div className={`grid lg:grid-cols-2 gap-12 lg:gap-24 items-center ${isOverlap ? 'lg:grid-cols-12' : ''}`}>
+
+                            {/* Image Column */}
+                            <div className={`
+                        relative 
+                        ${isImageLeft ? 'lg:order-1' : 'lg:order-2'} 
+                        ${isOverlap
+                                    ? isImageLeft ? 'lg:col-span-8 lg:col-start-1' : 'lg:col-span-8 lg:col-start-5'
+                                    : ''
+                                } 
+                        group
                     `}>
-                        {title && (
-                            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent inline-block">
-                                {title}
-                            </h2>
-                        )}
+                                <div className={`
+                            relative rounded-3xl overflow-hidden shadow-2xl border border-white/10
+                            ${isOverlap ? 'aspect-[16/9] lg:aspect-[21/9] min-h-[400px]' : 'aspect-square lg:aspect-[4/3]'}
+                        `}>
+                                    {image ? (
+                                        <Image
+                                            src={image}
+                                            alt={title}
+                                            fill
+                                            className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                            sizes="(max-width: 1024px) 100vw, 50vw"
+                                        />
+                                    ) : (
+                                        // Premium Nebula Fallback
+                                        <div className="absolute inset-0 bg-[#0a0a0a] flex items-center justify-center overflow-hidden">
+                                            <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-pink-500/20 animate-pulse" />
+                                            <div className="absolute inset-0 bg-grid-white/[0.1] bg-[length:30px_30px]" />
+                                            {/* Center Icon */}
+                                            <div className="relative z-10 w-24 h-24 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 flex items-center justify-center">
+                                                <svg className="w-10 h-10 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    )}
 
-                        <div
-                            className="prose prose-lg prose-invert max-w-none 
-                                prose-headings:text-white prose-headings:font-bold
-                                prose-p:text-gray-300 prose-p:leading-relaxed
-                                prose-li:text-gray-300
-                                prose-strong:text-purple-300
-                                prose-a:text-blue-400 hover:prose-a:text-blue-300"
-                            dangerouslySetInnerHTML={{ __html: content }}
-                        />
-                    </div>
-
-                    {/* Image or Pattern */}
-                    <div className={`relative ${isImageLeft ? 'lg:order-1' : 'lg:order-2'} ${isOverlap ? 'h-full min-h-[400px]' : ''} animate-fadeInUp`} style={{ animationDelay: '0.2s' }}>
-                        {image ? (
-                            <div className={`relative aspect-[4/3] w-full ${isOverlap ? 'h-full' : ''} rounded-3xl overflow-hidden shadow-2xl group border border-white/5`}>
-                                <Image
-                                    src={image}
-                                    alt={image_alt}
-                                    fill
-                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                    sizes="(max-width: 1024px) 100vw, 50vw"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/20 to-transparent mix-blend-overlay" />
-                            </div>
-                        ) : (
-                            // Fallback Geometric Pattern if no image
-                            <div className={`relative aspect-[4/3] w-full rounded-3xl overflow-hidden bg-gradient-to-br from-indigo-900 to-purple-900 border border-white/10 shadow-2xl flex items-center justify-center ${isOverlap ? 'h-full' : ''}`}>
-                                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-30" />
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" />
-                                {/* Placeholder Icon */}
-                                <div className="relative z-10 p-8 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 text-white/50">
-                                    <svg className="w-16 h-16 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
+                                    {/* Overlay Gradient */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60" />
                                 </div>
                             </div>
-                        )}
 
-                        {/* Decorative background blob for Standard layout */}
-                        {!isOverlap && (
-                            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-full blur-3xl -z-10`} />
-                        )}
+                            {/* Text Column */}
+                            <div className={`
+                        relative z-20
+                        ${isImageLeft ? 'lg:order-2' : 'lg:order-1'}
+                        ${isOverlap
+                                    ? isImageLeft
+                                        ? 'lg:col-span-5 lg:col-start-8 lg:-ml-12 mt-[-10%] lg:mt-0'
+                                        : 'lg:col-span-5 lg:col-start-1 lg:-mr-12 mt-[-10%] lg:mt-0'
+                                    : ''
+                                }
+                    `}>
+                                <div className={`
+                            ${isOverlap ? 'bg-white/5 backdrop-blur-xl border border-white/10 p-8 lg:p-12 rounded-3xl shadow-2xl skew-y-0' : 'space-y-8'}
+                        `}>
+                                    <h2 className={`
+                                font-bold text-white tracking-tighter leading-tight
+                                ${isOverlap ? 'text-3xl lg:text-5xl mb-6' : 'text-4xl lg:text-6xl'}
+                            `}>
+                                        {title}
+                                    </h2>
+                                    <div
+                                        className={`prose prose-invert prose-lg text-gray-300 leading-relaxed ${isOverlap ? 'max-w-none' : ''}`}
+                                        dangerouslySetInnerHTML={{ __html: content }}
+                                    />
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
 
                 </div>
