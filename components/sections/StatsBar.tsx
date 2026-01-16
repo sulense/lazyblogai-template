@@ -34,7 +34,6 @@ function CountingNumber({ value }: { value: string }) {
     useEffect(() => {
         if (!hasAnimated) return;
 
-        // Parse number from string (e.g. "500+" -> 500)
         const numberMatch = value.match(/\d+/);
         if (!numberMatch) {
             setDisplayValue(value);
@@ -75,42 +74,26 @@ export function StatsBar({
     const isFloating = layout === 'floating';
 
     return (
-        <section className={`
-            relative py-12 lg:py-16 overflow-hidden
-            ${isFloating
-                ? 'py-20'
-                : 'border-y border-white/5 bg-white/[0.02] backdrop-blur-sm'
-            }
-        `}>
-            {/* Ambient Background Glow for Standard Layout */}
-            {!isFloating && (
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[200px] bg-purple-500/10 blur-[80px] rounded-full" />
-                </div>
-            )}
+        <section className="py-16 px-6 relative overflow-hidden border-y border-white/5 bg-black/20">
+            {/* Background Glow */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[50vw] h-32 bg-purple-500/10 blur-[80px] rounded-full" />
+            </div>
 
-            <div className={`max-w-7xl mx-auto px-6 relative z-10`}>
+            <div className="max-w-7xl mx-auto relative z-10">
                 {title && (
                     <h2 className="text-2xl font-bold text-white text-center mb-12 uppercase tracking-widest opacity-80">
                         {title}
                     </h2>
                 )}
 
-                <div className={`
-                    grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12
-                    ${isFloating ? 'bg-black/80 backdrop-blur-xl rounded-3xl p-12 border border-white/10 shadow-2xl' : ''}
-                `}>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                     {stats.map((stat, index) => (
-                        <div
-                            key={index}
-                            className={`flex flex-col items-center justify-center text-center space-y-2 group
-                                ${!isFloating && index !== stats.length - 1 ? 'lg:border-r lg:border-white/5' : ''}
-                            `}
-                        >
-                            <div className="text-4xl lg:text-5xl font-bold font-mono tracking-tighter text-white tabular-nums group-hover:scale-110 transition-transform duration-300">
+                        <div key={index} className="space-y-2">
+                            <div className="text-4xl md:text-5xl font-bold text-white">
                                 <CountingNumber value={stat.value} />
                             </div>
-                            <div className="text-sm uppercase tracking-widest text-purple-400 font-semibold opacity-80 group-hover:opacity-100 transition-opacity">
+                            <div className="text-sm uppercase tracking-widest text-purple-400 font-medium">
                                 {stat.label}
                             </div>
                         </div>

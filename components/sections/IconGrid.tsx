@@ -1,5 +1,5 @@
 interface IconGridItem {
-    icon: string; // Emoji or icon name
+    icon: string;
     title: string;
     description: string;
 }
@@ -20,8 +20,6 @@ export function IconGrid({
     layout = 'standard',
 }: IconGridProps) {
     const isFeatureCard = layout === 'feature-card';
-
-    // Feature cards force 2 columns for better readability
     const effectiveColumns = isFeatureCard ? 2 : columns;
 
     const gridClass = {
@@ -32,62 +30,53 @@ export function IconGrid({
 
     return (
         <section className="py-24 px-6 relative overflow-hidden">
-            {/* Cinematic Noise Background */}
-            <div className="absolute inset-0 bg-noise opacity-[0.03] pointer-events-none" />
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-purple-500/10 blur-[120px] rounded-full pointer-events-none" />
+            {/* Background Glow */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-96 bg-purple-500/10 blur-[100px] rounded-full" />
+            </div>
 
-            <div className={`max-w-7xl mx-auto ${isFeatureCard ? 'max-w-6xl' : ''} relative z-10`}>
+            <div className="max-w-7xl mx-auto relative z-10">
                 {/* Header */}
                 {(title || subtitle) && (
-                    <div className="text-center mb-20 space-y-6 animate-fadeInUp">
+                    <div className="text-center mb-16 space-y-4">
                         {title && (
-                            <h2 className="text-4xl md:text-6xl font-bold text-white tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
+                            <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
                                 {title}
                             </h2>
                         )}
                         {subtitle && (
-                            <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed font-light">
+                            <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
                                 {subtitle}
                             </p>
                         )}
                     </div>
                 )}
 
-                {/* Bento Grid */}
-                <div className={`grid ${gridClass} gap-6`}>
+                {/* Grid */}
+                <div className={`grid ${gridClass} gap-8`}>
                     {items.map((item, index) => (
                         <div
                             key={index}
-                            className={`group relative rounded-3xl overflow-hidden transition-all duration-500 animate-fadeInUp
-                                ${isFeatureCard
-                                    ? 'p-10 bg-white/[0.03] border border-white/10 hover:border-white/20 flex flex-col items-start gap-8'
-                                    : 'p-8 bg-white/[0.02] border border-white/[0.05] hover:border-white/10 hover:bg-white/[0.04]'
-                                }
+                            className={`group p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-purple-500/30 transition-all duration-300
+                                ${isFeatureCard ? 'p-10 flex flex-col items-start gap-6' : ''}
                             `}
-                            style={{ animationDelay: `${index * 0.1}s` }}
                         >
-                            {/* Spotlight Gradient */}
-                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-[radial-gradient(800px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(139,92,246,0.15),transparent_40%)]" />
-                            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.08] to-transparent opacity-0 group-hover:opacity-100 transition duration-500" />
-
                             {/* Icon */}
-                            <div className={`relative z-10 flex items-center justify-center transition-all duration-500
+                            <div className={`flex items-center justify-center transition-all duration-300 group-hover:scale-110
                                 ${isFeatureCard
-                                    ? 'w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 text-4xl mb-2 ring-1 ring-white/10 group-hover:ring-white/30'
-                                    : 'w-14 h-14 rounded-xl bg-white/5 text-3xl mb-6 group-hover:scale-110 group-hover:bg-white/10'
+                                    ? 'w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 text-3xl mb-2'
+                                    : 'w-14 h-14 rounded-xl bg-white/5 border border-white/10 text-2xl mb-6'
                                 }
                             `}>
                                 {item.icon}
                             </div>
 
-                            <div className={`relative z-10 ${isFeatureCard ? 'space-y-4' : ''}`}>
-                                {/* Title */}
-                                <h3 className={`font-semibold text-white tracking-tight ${isFeatureCard ? 'text-3xl' : 'text-xl mb-3'}`}>
+                            {/* Content */}
+                            <div>
+                                <h3 className={`font-bold text-white mb-3 ${isFeatureCard ? 'text-2xl' : 'text-xl'}`}>
                                     {item.title}
                                 </h3>
-
-                                {/* Description */}
-                                <p className={`text-gray-400 leading-relaxed font-light ${isFeatureCard ? 'text-lg' : 'text-sm'}`}>
+                                <p className={`text-gray-400 leading-relaxed ${isFeatureCard ? 'text-lg' : 'text-base'}`}>
                                     {item.description}
                                 </p>
                             </div>
