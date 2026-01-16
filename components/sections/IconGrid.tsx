@@ -32,59 +32,62 @@ export function IconGrid({
 
     return (
         <section className="py-24 px-6 relative overflow-hidden">
-            {/* Ambient Background Glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-500/5 rounded-full blur-3xl -z-10" />
+            {/* Cinematic Noise Background */}
+            <div className="absolute inset-0 bg-noise opacity-[0.03] pointer-events-none" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-purple-500/10 blur-[120px] rounded-full pointer-events-none" />
 
-            <div className={`max-w-7xl mx-auto ${isFeatureCard ? 'max-w-6xl' : ''}`}>
+            <div className={`max-w-7xl mx-auto ${isFeatureCard ? 'max-w-6xl' : ''} relative z-10`}>
                 {/* Header */}
                 {(title || subtitle) && (
-                    <div className="text-center mb-16 space-y-6 animate-fadeInUp">
+                    <div className="text-center mb-20 space-y-6 animate-fadeInUp">
                         {title && (
-                            <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
+                            <h2 className="text-4xl md:text-6xl font-bold text-white tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
                                 {title}
                             </h2>
                         )}
                         {subtitle && (
-                            <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
+                            <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed font-light">
                                 {subtitle}
                             </p>
                         )}
                     </div>
                 )}
 
-                {/* Grid */}
-                <div className={`grid ${gridClass} gap-8`}>
+                {/* Bento Grid */}
+                <div className={`grid ${gridClass} gap-6`}>
                     {items.map((item, index) => (
                         <div
                             key={index}
-                            className={`group relative rounded-3xl backdrop-blur-sm transition-all duration-300 animate-fadeInUp
+                            className={`group relative rounded-3xl overflow-hidden transition-all duration-500 animate-fadeInUp
                                 ${isFeatureCard
-                                    ? 'p-10 bg-white/5 hover:bg-white/10 border border-white/10 text-left flex flex-col items-start gap-6 hover:translate-x-2'
-                                    : 'p-8 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-purple-500/30 hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-500/10'
+                                    ? 'p-10 bg-white/[0.03] border border-white/10 hover:border-white/20 flex flex-col items-start gap-8'
+                                    : 'p-8 bg-white/[0.02] border border-white/[0.05] hover:border-white/10 hover:bg-white/[0.04]'
                                 }
                             `}
                             style={{ animationDelay: `${index * 0.1}s` }}
                         >
-                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                            {/* Spotlight Gradient */}
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-[radial-gradient(800px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(139,92,246,0.15),transparent_40%)]" />
+                            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.08] to-transparent opacity-0 group-hover:opacity-100 transition duration-500" />
 
                             {/* Icon */}
-                            <div className={`relative flex items-center justify-center transition-all duration-300 shadow-lg
+                            <div className={`relative z-10 flex items-center justify-center transition-all duration-500
                                 ${isFeatureCard
-                                    ? 'w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-4xl mb-2'
-                                    : 'w-16 h-16 rounded-2xl bg-gradient-to-br from-white/5 to-white/10 border border-white/5 mb-6 text-3xl group-hover:scale-110 group-hover:rotate-3'
+                                    ? 'w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 text-4xl mb-2 ring-1 ring-white/10 group-hover:ring-white/30'
+                                    : 'w-14 h-14 rounded-xl bg-white/5 text-3xl mb-6 group-hover:scale-110 group-hover:bg-white/10'
                                 }
                             `}>
                                 {item.icon}
                             </div>
 
-                            <div className={isFeatureCard ? 'space-y-3' : ''}>
+                            <div className={`relative z-10 ${isFeatureCard ? 'space-y-4' : ''}`}>
                                 {/* Title */}
-                                <h3 className={`relative font-bold text-white transition-colors group-hover:text-purple-300 ${isFeatureCard ? 'text-2xl' : 'text-xl mb-3'}`}>
+                                <h3 className={`font-semibold text-white tracking-tight ${isFeatureCard ? 'text-3xl' : 'text-xl mb-3'}`}>
                                     {item.title}
                                 </h3>
 
                                 {/* Description */}
-                                <p className={`relative text-gray-400 leading-relaxed transition-colors group-hover:text-gray-300 ${isFeatureCard ? 'text-lg' : 'text-base'}`}>
+                                <p className={`text-gray-400 leading-relaxed font-light ${isFeatureCard ? 'text-lg' : 'text-sm'}`}>
                                     {item.description}
                                 </p>
                             </div>

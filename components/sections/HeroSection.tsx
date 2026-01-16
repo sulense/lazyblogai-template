@@ -49,13 +49,30 @@ export function HeroSection({
                         className={`absolute inset-0 bg-black ${isSplit ? 'lg:bg-gradient-to-r lg:from-black lg:via-black/50 lg:to-transparent' : ''}`}
                         style={{ opacity: isSplit ? 1 : overlay_opacity / 100 }}
                     />
+                    {/* Cinematic Noise Overlay on Image */}
+                    <div className="absolute inset-0 bg-noise mix-blend-overlay opacity-20 pointer-events-none" />
                 </>
             ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900 animate-gradient-xy">
-                    <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20 bg-center" />
-                    {/* Floating blobs for no-image state */}
-                    <div className="absolute top-0 -left-4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob" />
-                    <div className="absolute top-0 -right-4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000" />
+                <div className="absolute inset-0 w-full h-full bg-slate-950 overflow-hidden">
+                    {/* Aurora Mesh Gradient */}
+                    <div className="absolute inset-0 opacity-50 dark:opacity-40 animate-aurora
+                        [background-image:var(--white-gradient),var(--aurora)]
+                        [background-size:300%,_200%]
+                        [background-position:50%_50%,_50%_50%]
+                        filter blur-[10px] invert dark:invert-0
+                        after:content-[''] after:absolute after:inset-0 after:[background-image:var(--white-gradient),var(--aurora)] 
+                        after:[background-size:200%,_100%] 
+                        after:animate-aurora after:[background-attachment:fixed] after:mix-blend-difference
+                    " style={{
+                            backgroundImage: 'repeating-linear-gradient(100deg, #60a5fa 0%, #a855f7 7%, #0000 10%, #0000 100%), repeating-linear-gradient(100deg, #60a5fa 10%, #a855f7 35%, #0000 40%, #0000 100%)'
+                        }} />
+
+                    {/* Tech Grid & Noise */}
+                    <div className="absolute inset-0 bg-grid-white/[0.05] bg-[length:40px_40px]" />
+                    <div className="absolute inset-0 bg-noise opacity-[0.2]" />
+
+                    {/* Radial Vignette */}
+                    <div className="absolute inset-0 bg-black [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]" />
                 </div>
             )}
 
