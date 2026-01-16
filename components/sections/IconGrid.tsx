@@ -54,8 +54,8 @@ export function IconGrid({
                             key={index}
                             className={`group relative rounded-3xl overflow-hidden transition-all duration-500 animate-fadeInUp
                                 ${isFeatureCard
-                                    ? 'p-10 bg-white/[0.03] border border-white/10 hover:border-white/20 flex flex-col items-start gap-8'
-                                    : 'p-8 bg-white/[0.02] border border-white/[0.05] hover:border-white/10 hover:bg-white/[0.04]'
+                                    ? 'p-10 bg-white/[0.05] border border-white/10 hover:border-white/20 flex flex-col items-start gap-8 shadow-2xl'
+                                    : 'p-8 bg-white/[0.03] border border-white/[0.08] hover:border-white/15 hover:bg-white/[0.06] shadow-xl'
                                 }
                             `}
                             style={{ animationDelay: `${index * 0.1}s` }}

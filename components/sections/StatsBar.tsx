@@ -79,7 +79,7 @@ export function StatsBar({
             relative py-20 lg:py-28 overflow-hidden
             ${isFloating
                 ? 'py-32 bg-transparent'
-                : 'border-y border-white/5 bg-white/[0.02] backdrop-blur-sm'
+                : 'border-y border-white/10 bg-white/[0.03] backdrop-blur-md shadow-2xl'
             }
         `}>
             {/* Ambient Background Glow for Standard Layout */}
