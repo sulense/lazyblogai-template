@@ -51,8 +51,11 @@ export function HeroSection({
                     />
                 </>
             ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-black animate-gradient-xy">
-                    <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10 bg-center" />
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900 animate-gradient-xy">
+                    <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20 bg-center" />
+                    {/* Floating blobs for no-image state */}
+                    <div className="absolute top-0 -left-4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob" />
+                    <div className="absolute top-0 -right-4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000" />
                 </div>
             )}
 
@@ -61,12 +64,15 @@ export function HeroSection({
 
                 <div className={`flex flex-col gap-8 ${isSplit ? 'lg:w-1/2 items-start text-left' : alignmentClass}`}>
                     <div className="space-y-6 animate-fadeInUp">
-                        <h1 className={`${isMinimal ? 'text-7xl md:text-9xl tracking-tighter' : 'text-5xl md:text-7xl'} font-bold text-white leading-tight drop-shadow-xl`}>
+                        <h1 className={`
+                            ${isMinimal ? 'text-7xl md:text-9xl tracking-tighter bg-gradient-to-br from-white via-gray-200 to-gray-500 bg-clip-text text-transparent' : 'text-5xl md:text-7xl text-white'} 
+                            font-bold leading-tight drop-shadow-xl
+                        `}>
                             {headline}
                         </h1>
 
                         {subheadline && (
-                            <p className={`${isMinimal ? 'text-xl uppercase tracking-widest text-gray-400' : 'text-xl md:text-2xl text-gray-200'} max-w-2xl leading-relaxed`}>
+                            <p className={`${isMinimal ? 'text-xl uppercase tracking-widest text-purple-300' : 'text-xl md:text-2xl text-gray-200'} max-w-2xl leading-relaxed`}>
                                 {subheadline}
                             </p>
                         )}
