@@ -12,7 +12,7 @@ interface HeroSectionProps {
     layout?: 'classic' | 'split' | 'minimal';
 }
 
-export default function HeroSection({
+export function HeroSection({
     headline,
     subheadline,
     background_image,
