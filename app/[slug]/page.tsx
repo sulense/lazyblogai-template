@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { ArticleSchema, BreadcrumbSchema } from "../../components/structured-data";
 import { Metadata } from "next";
-import { renderSections, Section } from "../../components/sections";
 
 export const revalidate = 60;
 
@@ -34,41 +33,8 @@ interface Post {
     is_published: boolean;
 }
 
-interface StaticPage {
-    id: string;
-    title: string;
-    slug: string;
-    page_type: string;
-    sections: Section[];
-    meta_title: string | null;
-    meta_description: string | null;
-    og_image: string | null;
-    is_published: boolean;
-}
-
 interface Props {
     params: { slug: string };
-}
-
-// Check if slug is a static page first
-async function getPage(slug: string): Promise<StaticPage | null> {
-    const siteId = process.env.SITE_ID;
-    if (!siteId || !process.env.NEXT_PUBLIC_SUPABASE_URL) return null;
-
-    const supabase = getSupabase();
-    const { data, error } = await supabase
-        .from('site_pages')
-        .select('*')
-        .eq('site_id', siteId)
-        .eq('slug', slug)
-        .eq('is_published', true)
-        .single();
-
-    if (error || !data) return null;
-    return {
-        ...data,
-        sections: (data.sections || []) as Section[],
-    };
 }
 
 async function getPost(slug: string): Promise<Post | null> {
@@ -89,19 +55,6 @@ async function getPost(slug: string): Promise<Post | null> {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    // Check for page first
-    const page = await getPage(params.slug);
-    if (page) {
-        return {
-            title: page.meta_title || page.title,
-            description: page.meta_description || undefined,
-            openGraph: page.og_image ? {
-                images: [{ url: page.og_image }],
-            } : undefined,
-        };
-    }
-
-    // Fall back to post
     const post = await getPost(params.slug);
     if (!post) return { title: "Not Found" };
 
@@ -129,35 +82,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
 }
 
-// Extract headings for Table of Contents from HTML
-function extractHeadings(content: string): { id: string; text: string }[] {
-    const headings: { id: string; text: string }[] = [];
-    // Match h2 tags: <h2 ...>Text</h2>
-    const regex = /<h2[^>]*>(.*?)<\/h2>/g;
-    let match;
-
-    while ((match = regex.exec(content)) !== null) {
-        const text = match[1].replace(/<[^>]+>/g, ''); // Strip any inner tags
-        const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-        headings.push({ id, text });
-    }
-
-    return headings;
-}
-
 export default async function SlugPage({ params }: Props) {
-    // Check if this is a static page (About, Contact, Privacy, Terms, etc.)
-    const page = await getPage(params.slug);
-    if (page) {
-        // Render the static page using sections
-        return (
-            <main className="min-h-screen">
-                {renderSections(page.sections)}
-            </main>
-        );
-    }
-
-    // Fall back to blog post
     const post = await getPost(params.slug);
     if (!post) {
         notFound();
@@ -165,11 +90,8 @@ export default async function SlugPage({ params }: Props) {
 
     // Inject IDs into H2 tags for TOC navigation
     const processContent = (htmlContent: string) => {
-        // First, unescape any HTML entities if they exist (e.g. &lt;div&gt; -> <div>)
-        // This handles cases where the AI output or DB storage escaped the tags
         let processed = htmlContent;
 
-        // Helper function to unescape HTML entities
         const unescapeHtml = (text: string): string => {
             return text
                 .replace(/&lt;/g, '<')
@@ -179,11 +101,9 @@ export default async function SlugPage({ params }: Props) {
                 .replace(/&#x27;/g, "'")
                 .replace(/&#x2F;/g, '/')
                 .replace(/&nbsp;/g, ' ')
-                .replace(/&amp;/g, '&'); // Must be last to avoid double-unescaping
+                .replace(/&amp;/g, '&');
         };
 
-        // Check if content looks like it's escaped HTML (starts with &lt; or contains visible HTML text patterns)
-        // Apply unescaping multiple times in case of double-encoding
         let previousContent = '';
         let iterations = 0;
         while (previousContent !== processed && iterations < 3) {
@@ -193,20 +113,12 @@ export default async function SlugPage({ params }: Props) {
         }
 
         const headings: { id: string; text: string }[] = [];
-
-        // Regex to match h2 tags and capture attributes and content
-        // This regex handles existing attributes and ensures we don't duplicate ids
         const regex = /<h2([^>]*)>(.*?)<\/h2>/gi;
 
         processed = processed.replace(regex, (match, attrs, text) => {
-            // Strip tags from text for the ID
             const cleanText = text.replace(/<[^>]+>/g, '');
             const id = cleanText.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-
             headings.push({ id, text: cleanText });
-
-            // If the tag already has an ID, leave it (or overwrite it, but let's assume we want our generated one)
-            // Simpler approach: Just force our ID.
             return `<h2 id="${id}"${attrs}>${text}</h2>`;
         });
 
