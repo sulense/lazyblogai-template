@@ -24,18 +24,21 @@ export function IconGrid({
     }[columns];
 
     return (
-        <section className="py-16 px-6">
+        <section className="py-24 px-6 relative overflow-hidden">
+            {/* Ambient Background Glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-500/5 rounded-full blur-3xl -z-10" />
+
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 {(title || subtitle) && (
-                    <div className="text-center mb-12 space-y-4">
+                    <div className="text-center mb-16 space-y-6 animate-fadeInUp">
                         {title && (
-                            <h2 className="text-3xl md:text-4xl font-bold text-white">
+                            <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
                                 {title}
                             </h2>
                         )}
                         {subtitle && (
-                            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+                            <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
                                 {subtitle}
                             </p>
                         )}
@@ -47,20 +50,23 @@ export function IconGrid({
                     {items.map((item, index) => (
                         <div
                             key={index}
-                            className="group p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-purple-500/30 transition-all duration-300"
+                            className="group relative p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 hover:border-purple-500/30 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-500/10 animate-fadeInUp"
+                            style={{ animationDelay: `${index * 0.1}s` }}
                         >
+                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
                             {/* Icon */}
-                            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center mb-4 text-2xl group-hover:scale-110 transition-transform">
+                            <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-white/5 to-white/10 border border-white/5 flex items-center justify-center mb-6 text-3xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
                                 {item.icon}
                             </div>
 
                             {/* Title */}
-                            <h3 className="text-xl font-bold text-white mb-2">
+                            <h3 className="relative text-xl font-bold text-white mb-3 group-hover:text-purple-300 transition-colors">
                                 {item.title}
                             </h3>
 
                             {/* Description */}
-                            <p className="text-gray-400 leading-relaxed">
+                            <p className="relative text-gray-400 leading-relaxed text-base group-hover:text-gray-300 transition-colors">
                                 {item.description}
                             </p>
                         </div>
