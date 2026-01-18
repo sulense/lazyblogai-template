@@ -16,9 +16,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const post = await ContentService.getPostBySlug(params.slug);
     if (!post) return { title: "Not Found" };
 
-    const title = post.seo_title || post.meta_title || post.title;
-    const description = post.seo_description || post.meta_description || post.excerpt || post.content?.substring(0, 155) || '';
-    const image = proxyImage(post.og_image || post.featured_image || null);
+    const title = post.seo_title || post.title;
+    const description = post.seo_description || post.excerpt || post.content?.substring(0, 155) || '';
+    const image = proxyImage(post.featured_image || null);
 
     return {
         title,
