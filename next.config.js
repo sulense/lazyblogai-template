@@ -22,6 +22,10 @@ const nextConfig = {
                 source: '/:filename(google.*\\.html)',
                 destination: '/api/verification/:filename',
             },
+            {
+                source: '/images/:path*',
+                destination: 'https://fmsylpaaluexiqxgpfrv.supabase.co/storage/v1/object/public/:path*',
+            },
         ];
     },
 };

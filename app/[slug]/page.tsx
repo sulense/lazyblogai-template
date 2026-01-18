@@ -2,8 +2,20 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
+import { getPost, getRelatedPosts, getSiteDetails } from "@/app/actions";
 import { ArticleSchema, BreadcrumbSchema, AuthorSchema } from "../../components/structured-data";
 import { Metadata } from "next";
+import {
+    Calendar,
+    Clock,
+    ChevronRight,
+    Facebook,
+    Twitter,
+    Linkedin,
+    Link as LinkIcon,
+    User
+} from "lucide-react";
+import { proxyImage, proxyContentImages } from "@/lib/image-proxy";
 
 export const revalidate = 60;
 
@@ -63,18 +75,18 @@ async function getPost(slug: string): Promise<Post | null> {
     return data;
 }
 
-async function getSiteName(): Promise<string> {
+async function getSiteDetails(): Promise<{ name: string, logo: string | null }> {
     const siteId = process.env.SITE_ID;
-    if (!siteId || !process.env.NEXT_PUBLIC_SUPABASE_URL) return 'LazyBlog';
+    if (!siteId || !process.env.NEXT_PUBLIC_SUPABASE_URL) return { name: 'LazyBlog', logo: null };
 
     const supabase = getSupabase();
     const { data } = await supabase
         .from('sites')
-        .select('name')
+        .select('name, logo_url')
         .eq('id', siteId)
         .single();
 
-    return data?.name || 'LazyBlog';
+    return { name: data?.name || 'LazyBlog', logo: data?.logo_url || null };
 }
 
 async function getRelatedPosts(category: string, excludeSlug: string): Promise<RelatedPost[]> {
@@ -101,7 +113,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     const title = post.meta_title || post.title;
     const description = post.meta_description || post.excerpt || post.content?.substring(0, 155) || '';
-    const image = post.og_image || post.featured_image;
+    const image = proxyImage(post.og_image || post.featured_image);
 
     return {
         title,
@@ -125,7 +137,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function SlugPage({ params }: Props) {
     const post = await getPost(params.slug);
-    const siteName = await getSiteName();
+    const site = await getSiteDetails();
 
     if (!post) {
         notFound();
@@ -137,6 +149,10 @@ export default async function SlugPage({ params }: Props) {
     // Inject IDs into H2 tags for TOC navigation
     const processContent = (htmlContent: string) => {
         let processed = htmlContent;
+        if (!processed) return { processed: '', headings: [] };
+
+        // 1. First, white-label all images
+        processed = proxyContentImages(processed);
 
         const unescapeHtml = (text: string): string => {
             return text
@@ -192,26 +208,28 @@ export default async function SlugPage({ params }: Props) {
                 headline={post.title}
                 url={articleUrl}
                 datePublished={post.created_at}
-                author={{ name: post.author_name || siteName }}
+                author={{ name: post.author_name || site.name }}
                 image={post.featured_image || undefined}
                 description={post.excerpt || post.content?.substring(0, 155) || ''}
             />
             <BreadcrumbSchema items={breadcrumbs} />
 
-            {/* Full-width Hero Image */}
-            <div className="relative w-full h-[50vh] md:h-[60vh] overflow-hidden">
-                {post.featured_image ? (
-                    <Image
-                        src={post.featured_image}
-                        alt={post.title}
-                        fill
-                        priority
-                        className="object-cover"
-                        sizes="100vw"
-                    />
-                ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-900 to-blue-900" />
-                )}
+            {/* Hero Section */}
+            <div className="relative h-[60vh] min-h-[400px] w-full flex items-center justify-center overflow-hidden">
+                {/* Background Image with Overlay */}
+                <div className="absolute inset-0 z-0">
+                    {post.featured_image ? (
+                        <Image
+                            src={proxyImage(post.featured_image)}
+                            alt={post.title}
+                            fill
+                            className="object-cover"
+                            priority
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-slate-900" />
+                    )}
+                </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-white via-white/25 to-transparent dark:from-[#0a0a0b] dark:via-black/50 dark:to-transparent" />
             </div>
 
@@ -251,9 +269,9 @@ export default async function SlugPage({ params }: Props) {
                         {/* Author & Meta */}
                         <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 py-6 border-y border-gray-200 dark:border-white/10">
                             <div className="flex items-center gap-4">
-                                {post.author_avatar ? (
+                                {post.author_avatar || site.logo ? (
                                     <Image
-                                        src={post.author_avatar}
+                                        src={proxyImage(post.author_avatar || site.logo || '')}
                                         alt={post.author_name || 'Author'}
                                         width={56}
                                         height={56}
@@ -261,11 +279,11 @@ export default async function SlugPage({ params }: Props) {
                                     />
                                 ) : (
                                     <div className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold text-xl">
-                                        {(post.author_name || siteName)[0]}
+                                        {(post.author_name || site.name)[0]}
                                     </div>
                                 )}
                                 <div>
-                                    <div className="font-semibold text-gray-900 dark:text-white">{post.author_name || siteName}</div>
+                                    <div className="font-semibold text-gray-900 dark:text-white">{post.author_name || site.name}</div>
                                     <time dateTime={post.created_at} className="text-sm text-gray-500">
                                         {new Date(post.created_at).toLocaleDateString('en-US', {
                                             month: 'long',
@@ -368,22 +386,22 @@ export default async function SlugPage({ params }: Props) {
                     {post.author_name && (
                         <section className="bg-gray-50 dark:bg-gradient-to-br dark:from-white/5 dark:to-white/[0.02] border border-gray-200 dark:border-white/10 rounded-3xl p-8 mt-16 transition-colors" aria-labelledby="author-heading">
                             <div className="flex flex-col sm:flex-row items-start gap-6">
-                                {post.author_avatar ? (
+                                {post.author_avatar || site.logo ? (
                                     <Image
-                                        src={post.author_avatar}
-                                        alt={post.author_name}
+                                        src={post.author_avatar || site.logo || ''}
+                                        alt={post.author_name || site.name}
                                         width={80}
                                         height={80}
                                         className="rounded-full"
                                     />
                                 ) : (
                                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold text-3xl">
-                                        {(post.author_name || siteName)[0]}
+                                        {(post.author_name || site.name)[0]}
                                     </div>
                                 )}
                                 <div className="flex-1">
                                     <h2 id="author-heading" className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                                        Written by {post.author_name || siteName}
+                                        Written by {post.author_name || site.name}
                                     </h2>
                                     {post.author_bio && (
                                         <p className="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">{post.author_bio}</p>
