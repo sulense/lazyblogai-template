@@ -143,28 +143,7 @@ html.light .prose-invert {
   --tw-prose-td-borders: #e5e7eb;
 }
 
-html.light .text-white {
-  color: #111827 !important;
-}
-
-html.light .text-gray-300,
-html.light .text-gray-400,
-html.light .text-gray-500 {
-  color: #6b7280 !important;
-}
-
-html.light .border-white\/10 {
-  border-color: rgba(0, 0, 0, 0.1) !important;
-}
-
-html.light .bg-white\/5 {
-  background: rgba(0, 0, 0, 0.03) !important;
-}
-
-html.light .bg-black\/40,
-html.light .bg-black\/30 {
-  background: rgba(255, 255, 255, 0.8) !important;
-}
+/* Global overrides removed - using Tailwind dark: modifier instead */
 
 /* Ambient background for light mode */
 html.light .ambient-bg {
@@ -286,6 +265,29 @@ html.dark .ambient-bg {
   padding: 0.2em 0.4em;
   border-radius: 4px;
   font-size: 0.9em;
+}
+
+/* TL;DR Box - Article summary styling */
+.tldr-box {
+  padding: 1.25rem 1.5rem;
+  border-radius: 0.75rem;
+  margin-bottom: 2rem;
+  border-left: 4px solid var(--primary-color);
+}
+
+html.dark .tldr-box {
+  background: rgba(139, 92, 246, 0.08);
+  border-color: var(--primary-color);
+}
+
+html.light .tldr-box {
+  background: rgba(139, 92, 246, 0.06);
+  border-color: var(--primary-color);
+}
+
+.tldr-box strong {
+  color: var(--primary-color);
+  margin-right: 0.5rem;
 }
 
 /* Gradient text */

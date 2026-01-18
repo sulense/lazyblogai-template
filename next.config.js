@@ -16,6 +16,14 @@ const nextConfig = {
             },
         ],
     },
+    async rewrites() {
+        return [
+            {
+                source: '/:filename(google.*\\.html)',
+                destination: '/api/verification/:filename',
+            },
+        ];
+    },
 };
 
 module.exports = nextConfig;

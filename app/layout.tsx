@@ -186,7 +186,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                 </a>
 
                 {/* Navigation */}
-                <header className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-xl bg-black/40">
+                <header className="sticky top-0 z-50 border-b border-gray-200 dark:border-white/10 backdrop-blur-xl bg-white/80 dark:bg-black/40 transition-colors duration-300">
                     <nav className="max-w-7xl mx-auto px-6 py-4" aria-label="Main navigation">
                         <div className="flex items-center justify-between">
                             <a href="/" className="flex items-center gap-3 group" aria-label={`${siteName} home`}>
@@ -206,22 +206,29 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                                         </svg>
                                     </div>
                                 )}
-                                <span className="text-xl font-bold text-white tracking-tight">{siteName}</span>
+                                <span className="text-xl font-bold text-gray-900 dark:text-white tracking-tight transition-colors">{siteName}</span>
                             </a>
 
                             <div className="flex items-center gap-4">
                                 <ThemeToggle />
-                                <a href="/search" className="p-2 text-gray-400 hover:text-white transition-colors" aria-label="Search">
+                                <form action="/search" method="GET" className="relative hidden sm:block">
+                                    <input
+                                        type="search"
+                                        name="q"
+                                        placeholder="Search..."
+                                        className="w-40 lg:w-56 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full px-4 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 dark:focus:border-white/30 transition-all"
+                                    />
+                                    <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" aria-label="Search">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </button>
+                                </form>
+                                <a href="/search" className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors sm:hidden" aria-label="Search">
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
                                 </a>
-                                <button
-                                    className="px-5 py-2.5 rounded-full text-sm font-semibold text-white transition-all hover:opacity-90 shadow-lg hover:shadow-xl hover:scale-105"
-                                    style={{ background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}cc)` }}
-                                >
-                                    Subscribe
-                                </button>
                             </div>
                         </div>
                     </nav>
@@ -232,7 +239,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                 </main>
 
                 {/* Footer */}
-                <footer className="border-t border-white/10 mt-auto bg-black/30" role="contentinfo">
+                <footer className="border-t border-gray-200 dark:border-white/10 mt-auto bg-white/50 dark:bg-black/30 backdrop-blur-md transition-colors" role="contentinfo">
                     <div className="max-w-7xl mx-auto px-6 py-12">
                         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
                             <div className="flex items-center gap-3">
@@ -252,10 +259,19 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                                         </svg>
                                     </div>
                                 )}
-                                <span className="font-bold text-white text-lg">{siteName}</span>
+                                <span className="font-bold text-gray-900 dark:text-white text-lg transition-colors">{siteName}</span>
                             </div>
-                            <div className="text-sm text-gray-400">
-                                &copy; {new Date().getFullYear()} {siteName}. All rights reserved. <span className="opacity-50 text-xs ml-2">v1.1</span>
+                            <div className="text-sm text-gray-400 flex flex-col sm:flex-row sm:items-center gap-2">
+                                <span>&copy; {new Date().getFullYear()} {siteName}. All rights reserved.</span>
+                                <span className="hidden sm:inline text-gray-600">•</span>
+                                <a
+                                    href="https://lazyblog.ai"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-gray-500 hover:text-purple-400 transition-colors"
+                                >
+                                    Powered by LazyBlog AI
+                                </a>
                             </div>
                         </div>
                     </div>

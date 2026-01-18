@@ -25,7 +25,7 @@ jobs:
 
       - name: Add Upstream Remote
         run: |
-          git remote add upstream https://github.com/sulense/blogging-monster-template.git || true
+          git remote add upstream https://github.com/sulense/lazyblogai-template.git || true
           git fetch upstream
 
       - name: Merge Upstream Changes

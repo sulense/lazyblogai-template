@@ -63,6 +63,20 @@ async function getPost(slug: string): Promise<Post | null> {
     return data;
 }
 
+async function getSiteName(): Promise<string> {
+    const siteId = process.env.SITE_ID;
+    if (!siteId || !process.env.NEXT_PUBLIC_SUPABASE_URL) return 'LazyBlog';
+
+    const supabase = getSupabase();
+    const { data } = await supabase
+        .from('sites')
+        .select('name')
+        .eq('id', siteId)
+        .single();
+
+    return data?.name || 'LazyBlog';
+}
+
 async function getRelatedPosts(category: string, excludeSlug: string): Promise<RelatedPost[]> {
     const siteId = process.env.SITE_ID;
     if (!siteId || !process.env.NEXT_PUBLIC_SUPABASE_URL) return [];
@@ -111,6 +125,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function SlugPage({ params }: Props) {
     const post = await getPost(params.slug);
+    const siteName = await getSiteName();
+
     if (!post) {
         notFound();
     }
@@ -176,7 +192,7 @@ export default async function SlugPage({ params }: Props) {
                 headline={post.title}
                 url={articleUrl}
                 datePublished={post.created_at}
-                author={{ name: post.author_name || 'Author' }}
+                author={{ name: post.author_name || siteName }}
                 image={post.featured_image || undefined}
                 description={post.excerpt || post.content?.substring(0, 155) || ''}
             />
@@ -196,7 +212,7 @@ export default async function SlugPage({ params }: Props) {
                 ) : (
                     <div className="absolute inset-0 bg-gradient-to-br from-purple-900 to-blue-900" />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0b] via-black/50 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/25 to-transparent dark:from-[#0a0a0b] dark:via-black/50 dark:to-transparent" />
             </div>
 
             <article className="relative -mt-32 z-10">
@@ -206,14 +222,14 @@ export default async function SlugPage({ params }: Props) {
                     <nav aria-label="Breadcrumb" className="mb-8">
                         <ol className="flex items-center gap-2 text-sm flex-wrap" role="list">
                             <li>
-                                <Link href="/" className="text-gray-400 hover:text-white transition-colors">Home</Link>
+                                <Link href="/" className="text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors">Home</Link>
                             </li>
-                            <li className="text-gray-600">/</li>
+                            <li className="text-gray-400 dark:text-gray-600">/</li>
                             <li>
-                                <span className="text-gray-400">{post.category}</span>
+                                <span className="text-gray-600 dark:text-gray-400">{post.category}</span>
                             </li>
-                            <li className="text-gray-600">/</li>
-                            <li className="text-white font-medium truncate max-w-[200px]" aria-current="page">
+                            <li className="text-gray-400 dark:text-gray-600">/</li>
+                            <li className="text-gray-900 dark:text-white font-medium truncate max-w-[200px]" aria-current="page">
                                 {post.title}
                             </li>
                         </ol>
@@ -228,12 +244,12 @@ export default async function SlugPage({ params }: Props) {
                             {post.category}
                         </span>
 
-                        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-8">
+                        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight mb-8">
                             {post.title}
                         </h1>
 
                         {/* Author & Meta */}
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 py-6 border-y border-white/10">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 py-6 border-y border-gray-200 dark:border-white/10">
                             <div className="flex items-center gap-4">
                                 {post.author_avatar ? (
                                     <Image
@@ -241,15 +257,15 @@ export default async function SlugPage({ params }: Props) {
                                         alt={post.author_name || 'Author'}
                                         width={56}
                                         height={56}
-                                        className="rounded-full border-2 border-white/10"
+                                        className="rounded-full border-2 border-gray-100 dark:border-white/10"
                                     />
                                 ) : (
                                     <div className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold text-xl">
-                                        {(post.author_name || 'A')[0]}
+                                        {(post.author_name || siteName)[0]}
                                     </div>
                                 )}
                                 <div>
-                                    <div className="font-semibold text-white">{post.author_name || 'Author'}</div>
+                                    <div className="font-semibold text-gray-900 dark:text-white">{post.author_name || siteName}</div>
                                     <time dateTime={post.created_at} className="text-sm text-gray-500">
                                         {new Date(post.created_at).toLocaleDateString('en-US', {
                                             month: 'long',
@@ -274,7 +290,7 @@ export default async function SlugPage({ params }: Props) {
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
 
                         {/* Main Content */}
-                        <div className="lg:col-span-8 prose prose-lg prose-invert max-w-none prose-headings:text-white prose-p:text-gray-300 prose-a:text-purple-400 hover:prose-a:text-purple-300 prose-strong:text-white prose-li:text-gray-300">
+                        <div className="lg:col-span-8 prose prose-lg dark:prose-invert max-w-none prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-600 dark:prose-p:text-gray-300 prose-a:text-purple-600 dark:prose-a:text-purple-400 hover:prose-a:text-purple-500 dark:hover:prose-a:text-purple-300 prose-strong:text-gray-900 dark:prose-strong:text-white prose-li:text-gray-600 dark:prose-li:text-gray-300">
                             {contentHtml ? (
                                 <div dangerouslySetInnerHTML={{ __html: contentHtml }} />
                             ) : (
@@ -288,7 +304,7 @@ export default async function SlugPage({ params }: Props) {
 
                                 {/* Table of Contents */}
                                 {headings.length > 0 && (
-                                    <nav className="bg-white/5 border border-white/10 rounded-2xl p-6" aria-labelledby="toc-heading">
+                                    <nav className="bg-gray-50 border border-gray-200 dark:bg-white/5 dark:border-white/10 rounded-2xl p-6 transition-colors" aria-labelledby="toc-heading">
                                         <h2 id="toc-heading" className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-4">
                                             Table of Contents
                                         </h2>
@@ -297,7 +313,7 @@ export default async function SlugPage({ params }: Props) {
                                                 <li key={idx}>
                                                     <a
                                                         href={`#${heading.id}`}
-                                                        className="text-gray-400 hover:text-white transition-colors text-sm leading-snug block"
+                                                        className="text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors text-sm leading-snug block"
                                                     >
                                                         {heading.text}
                                                     </a>
@@ -314,17 +330,32 @@ export default async function SlugPage({ params }: Props) {
                                     </h2>
                                     <div className="flex gap-3">
                                         {[
-                                            { name: 'Twitter', icon: 'X' },
-                                            { name: 'Facebook', icon: 'f' },
-                                            { name: 'LinkedIn', icon: 'in' },
+                                            {
+                                                name: 'Twitter',
+                                                icon: 'X',
+                                                url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(articleUrl)}`
+                                            },
+                                            {
+                                                name: 'Facebook',
+                                                icon: 'f',
+                                                url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(articleUrl)}`
+                                            },
+                                            {
+                                                name: 'LinkedIn',
+                                                icon: 'in',
+                                                url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(articleUrl)}`
+                                            },
                                         ].map(platform => (
-                                            <button
+                                            <a
                                                 key={platform.name}
+                                                href={platform.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
                                                 aria-label={`Share on ${platform.name}`}
-                                                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors font-semibold text-sm"
+                                                className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-black dark:bg-white/5 dark:hover:bg-white/10 dark:text-gray-400 dark:hover:text-white flex items-center justify-center transition-colors font-semibold text-sm"
                                             >
                                                 {platform.icon}
-                                            </button>
+                                            </a>
                                         ))}
                                     </div>
                                 </div>
@@ -335,7 +366,7 @@ export default async function SlugPage({ params }: Props) {
 
                     {/* Author Box */}
                     {post.author_name && (
-                        <section className="bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 rounded-3xl p-8 mt-16" aria-labelledby="author-heading">
+                        <section className="bg-gray-50 dark:bg-gradient-to-br dark:from-white/5 dark:to-white/[0.02] border border-gray-200 dark:border-white/10 rounded-3xl p-8 mt-16 transition-colors" aria-labelledby="author-heading">
                             <div className="flex flex-col sm:flex-row items-start gap-6">
                                 {post.author_avatar ? (
                                     <Image
@@ -347,18 +378,18 @@ export default async function SlugPage({ params }: Props) {
                                     />
                                 ) : (
                                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold text-3xl">
-                                        {post.author_name[0]}
+                                        {(post.author_name || siteName)[0]}
                                     </div>
                                 )}
                                 <div className="flex-1">
-                                    <h2 id="author-heading" className="text-lg font-semibold text-white mb-2">
-                                        Written by {post.author_name}
+                                    <h2 id="author-heading" className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                        Written by {post.author_name || siteName}
                                     </h2>
                                     {post.author_bio && (
-                                        <p className="text-gray-400 mb-4 leading-relaxed">{post.author_bio}</p>
+                                        <p className="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">{post.author_bio}</p>
                                     )}
                                     <button
-                                        className="px-5 py-2.5 rounded-full text-sm font-semibold border border-white/20 text-white hover:bg-white/5 transition-colors"
+                                        className="px-5 py-2.5 rounded-full text-sm font-semibold border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-white/20 dark:text-white dark:hover:bg-white/5 transition-colors"
                                     >
                                         View all articles
                                     </button>
@@ -370,7 +401,7 @@ export default async function SlugPage({ params }: Props) {
                     {/* Related Posts */}
                     {relatedPosts.length > 0 && (
                         <section className="mt-16" aria-labelledby="related-heading">
-                            <h2 id="related-heading" className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+                            <h2 id="related-heading" className="text-2xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-3">
                                 <span className="w-1 h-8 rounded-full bg-purple-500" />
                                 Related Articles
                             </h2>
@@ -392,10 +423,10 @@ export default async function SlugPage({ params }: Props) {
                                                 )}
                                             </div>
                                             <div className="space-y-1">
-                                                <span className="text-xs font-medium text-purple-400 uppercase tracking-wider">
+                                                <span className="text-xs font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wider">
                                                     {related.category}
                                                 </span>
-                                                <h3 className="text-lg font-semibold text-white group-hover:text-purple-300 transition-colors line-clamp-2">
+                                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors line-clamp-2">
                                                     {related.title}
                                                 </h3>
                                                 <span className="text-sm text-gray-500">{related.read_time}</span>
@@ -411,7 +442,7 @@ export default async function SlugPage({ params }: Props) {
                     <div className="text-center py-16">
                         <Link
                             href="/"
-                            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors font-medium"
+                            className="inline-flex items-center gap-2 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors font-medium"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
