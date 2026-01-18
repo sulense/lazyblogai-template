@@ -52,6 +52,18 @@ export interface SiteSeoSettings {
     icon_512_url: string | null;
     robots_txt: string | null;
     ads_txt: string | null;
+    llms_txt: string | null;
+    enable_json_feed: boolean;
+    schema_json: string | null;
+    og_image_url: string | null;
+    og_type: string | null;
+    twitter_card: string | null;
+    twitter_handle: string | null;
+    favicon_url: string | null;
+    apple_touch_icon_url: string | null;
+    head_scripts: string | null;
+    body_scripts: string | null;
+    org_name: string | null;
 }
 
 export interface SiteConfig {

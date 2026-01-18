@@ -1,32 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
 import { Metadata } from "next";
 import { Pagination } from "../../../components/pagination";
+import { ContentService } from "@/lib/api";
 
 export const revalidate = 60; // Revalidate every minute
-
-function getSupabase() {
-    return createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
-}
-
-interface Post {
-    id: string;
-    title: string;
-    slug: string;
-    excerpt: string | null;
-    featured_image: string | null;
-    category: string;
-    read_time: string;
-    author_name: string | null;
-    author_avatar: string | null;
-    created_at: string;
-    is_published: boolean;
-}
 
 interface Props {
     params: { slug: string };
@@ -38,48 +17,8 @@ function normalizeCategory(slug: string): string {
     return decodeURIComponent(slug).replace(/-/g, ' ');
 }
 
-async function getCategoryPosts(categorySlug: string, page: number = 1) {
-    const siteId = process.env.SITE_ID;
-    if (!siteId || !process.env.NEXT_PUBLIC_SUPABASE_URL) return { posts: [], count: 0, categoryName: '' };
-
-    const supabase = getSupabase();
-    const normalized = normalizeCategory(categorySlug);
-    const pageSize = 9;
-    const from = (page - 1) * pageSize;
-    const to = from + pageSize - 1;
-
-    // Get total count
-    const { count } = await supabase
-        .from('posts')
-        .select('*', { count: 'exact', head: true })
-        .eq('site_id', siteId)
-        .eq('is_published', true)
-        .ilike('category', normalized);
-
-    // Get paginated posts
-    const { data, error } = await supabase
-        .from('posts')
-        .select('id, title, slug, excerpt, featured_image, category, read_time, author_name, author_avatar, created_at, is_published')
-        .eq('site_id', siteId)
-        .eq('is_published', true)
-        .ilike('category', normalized)
-        .order('created_at', { ascending: false })
-        .range(from, to);
-
-    if (error) {
-        console.error('Error fetching category posts:', error);
-        return { posts: [], count: 0, categoryName: normalized };
-    }
-
-    const displayCategory = data && data.length > 0 ? data[0].category : normalized;
-
-    return { posts: data || [], count: count || 0, categoryName: displayCategory };
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const { categoryName } = await getCategoryPosts(params.slug, 1);
-
-    // Capitalize for title
+    const categoryName = normalizeCategory(params.slug);
     const title = categoryName.charAt(0).toUpperCase() + categoryName.slice(1);
 
     return {
@@ -90,15 +29,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoryPage({ params, searchParams }: Props) {
     const page = parseInt(searchParams.page || '1');
-    const { posts, count, categoryName } = await getCategoryPosts(params.slug, page);
+    const categoryName = normalizeCategory(params.slug);
 
-    if (posts.length === 0 && page === 1) {
+    // Fetch posts for this category
+    const res = await ContentService.getPosts(page, 9, categoryName);
+
+    // If no posts found (and it's first page), or API failed, 404
+    // But simplistic check: if no data, 404
+    if (!res || (res.data.length === 0 && page === 1)) {
         notFound();
     }
 
+    const posts = res.data;
+    const { total, totalPages } = res.meta;
+
     const displayTitle = categoryName;
-    const pageSize = 9;
-    const totalPages = Math.ceil(count / pageSize);
 
     return (
         <main className="min-h-screen">
