@@ -1,14 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
-
-function getSupabase() {
-    return createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
-}
+import { ContentService } from '@/lib/api';
 
 export async function GET() {
-    const siteId = process.env.SITE_ID;
+    const siteConfig = await ContentService.getConfig();
 
     const defaultManifest = {
         name: 'Blog',
@@ -24,36 +17,22 @@ export async function GET() {
         ],
     };
 
-    if (!siteId || !process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    if (!siteConfig) {
         return new Response(JSON.stringify(defaultManifest, null, 2), {
             headers: { 'Content-Type': 'application/manifest+json' },
         });
     }
 
-    const supabase = getSupabase();
-
-    // Get site info
-    const { data: site } = await supabase
-        .from('sites')
-        .select('name, primary_color')
-        .eq('id', siteId)
-        .single();
-
-    // Get SEO settings
-    const { data: seo } = await supabase
-        .from('site_seo_settings')
-        .select('manifest_name, manifest_short_name, manifest_theme_color, manifest_background_color, manifest_display, icon_192_url, icon_512_url')
-        .eq('site_id', siteId)
-        .single();
+    const seo = siteConfig.site_seo_settings;
 
     const manifest = {
-        name: seo?.manifest_name || site?.name || 'Blog',
-        short_name: seo?.manifest_short_name || site?.name || 'Blog',
+        name: seo?.manifest_name || siteConfig.name || 'Blog',
+        short_name: seo?.manifest_short_name || siteConfig.name || 'Blog',
         description: 'A niche blog site',
         start_url: '/',
         display: seo?.manifest_display || 'standalone',
         background_color: seo?.manifest_background_color || '#000000',
-        theme_color: seo?.manifest_theme_color || site?.primary_color || '#8b5cf6',
+        theme_color: seo?.manifest_theme_color || siteConfig.primary_color || '#8b5cf6',
         icons: [
             {
                 src: seo?.icon_192_url || '/icon-192.png',

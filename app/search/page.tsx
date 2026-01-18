@@ -1,28 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import { createClient } from "@supabase/supabase-js";
+import { ContentService, Post } from "@/lib/api";
 import { Metadata } from "next";
 
 export const revalidate = 0; // Search results shouldn't be cached
-
-function getSupabase() {
-    return createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
-}
-
-interface Post {
-    id: string;
-    title: string;
-    slug: string;
-    excerpt: string | null;
-    featured_image: string | null;
-    category: string;
-    read_time: string;
-    author_name: string | null;
-    created_at: string;
-}
 
 interface Props {
     searchParams: { q?: string };
@@ -32,32 +13,20 @@ export const metadata: Metadata = {
     title: 'Search Results',
     description: 'Search for articles and guides.',
     robots: {
-        index: false, // Don't index search results
+        index: false,
         follow: false,
     },
 };
 
 export default async function SearchPage({ searchParams }: Props) {
     const query = searchParams.q || '';
-    const siteId = process.env.SITE_ID;
-    const supabase = getSupabase();
     let posts: Post[] = [];
     let hasSearched = query.length > 0;
 
-    if (hasSearched && siteId && process.env.NEXT_PUBLIC_SUPABASE_URL) {
-        // Use Supabase ILIKE for simple search
-        // For production, Full Text Search (FTS) is recommended
-        const { data, error } = await supabase
-            .from('posts')
-            .select('id, title, slug, excerpt, featured_image, category, read_time, author_name, created_at')
-            .eq('site_id', siteId)
-            .eq('is_published', true)
-            .ilike('title', `%${query}%`)
-            .order('created_at', { ascending: false })
-            .limit(20);
-
-        if (data) {
-            posts = data;
+    if (hasSearched) {
+        const res = await ContentService.getPosts(1, 20, undefined, query);
+        if (res) {
+            posts = res.data;
         }
     }
 

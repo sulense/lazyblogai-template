@@ -1,9 +1,9 @@
 import "./globals.css";
-import { createClient } from "@supabase/supabase-js";
 import { Inter, Roboto, Lora } from "next/font/google";
 import { Metadata } from "next";
 import { OrganizationSchema, WebSiteSchema } from "../components/structured-data";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { ContentService } from "@/lib/api";
 
 // Revalidate layout data (SEO settings, logo, etc.) every 60 seconds
 export const revalidate = 60;
@@ -13,32 +13,15 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const roboto = Roboto({ weight: ["400", "700"], subsets: ["latin"], variable: "--font-roboto" });
 const lora = Lora({ subsets: ["latin"], variable: "--font-lora" });
 
-function getSupabase() {
-    return createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
-}
-
 async function getSiteConfig() {
-    const siteId = process.env.SITE_ID;
-    if (!siteId || !process.env.NEXT_PUBLIC_SUPABASE_URL) return null;
+    const config = await ContentService.getConfig();
+    if (!config) return null;
 
-    const supabase = getSupabase();
-
-    const { data: site } = await supabase
-        .from("sites")
-        .select("primary_color, font_family, name, slug, custom_domain, google_site_verification_id")
-        .eq("id", siteId)
-        .single();
-
-    const { data: seo } = await supabase
-        .from("site_seo_settings")
-        .select("*")
-        .eq("site_id", siteId)
-        .single();
-
-    return { site, seo };
+    // Adapting the new generic config to the existing structure expected by the layout
+    return {
+        site: config,
+        seo: config.site_seo_settings
+    };
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -88,7 +71,7 @@ export async function generateMetadata(): Promise<Metadata> {
         },
         manifest: "/manifest.json",
         verification: {
-            google: site?.google_site_verification_id,
+            google: site?.google_site_verification_id || undefined,
         },
     };
 }

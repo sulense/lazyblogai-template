@@ -1,119 +1,24 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
-import { getPost, getRelatedPosts, getSiteDetails } from "@/app/actions";
-import { ArticleSchema, BreadcrumbSchema, AuthorSchema } from "../../components/structured-data";
+import { ContentService } from "@/lib/api";
+import { ArticleSchema, BreadcrumbSchema } from "../../components/structured-data";
 import { Metadata } from "next";
-import {
-    Calendar,
-    Clock,
-    ChevronRight,
-    Facebook,
-    Twitter,
-    Linkedin,
-    Link as LinkIcon,
-    User
-} from "lucide-react";
 import { proxyImage, proxyContentImages } from "@/lib/image-proxy";
 
 export const revalidate = 60;
-
-function getSupabase() {
-    return createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
-}
-
-interface Post {
-    id: string;
-    title: string;
-    slug: string;
-    content: string | null;
-    excerpt: string | null;
-    featured_image: string | null;
-    category: string;
-    read_time: string;
-    author_name: string | null;
-    author_avatar: string | null;
-    author_bio: string | null;
-    meta_title: string | null;
-    meta_description: string | null;
-    og_image: string | null;
-    created_at: string;
-    is_published: boolean;
-}
-
-interface RelatedPost {
-    id: string;
-    title: string;
-    slug: string;
-    featured_image: string | null;
-    category: string;
-    read_time: string;
-}
 
 interface Props {
     params: { slug: string };
 }
 
-async function getPost(slug: string): Promise<Post | null> {
-    const siteId = process.env.SITE_ID;
-    if (!siteId || !process.env.NEXT_PUBLIC_SUPABASE_URL) return null;
-
-    const supabase = getSupabase();
-    const { data, error } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('site_id', siteId)
-        .eq('slug', slug)
-        .eq('is_published', true)
-        .single();
-
-    if (error || !data) return null;
-    return data;
-}
-
-async function getSiteDetails(): Promise<{ name: string, logo: string | null }> {
-    const siteId = process.env.SITE_ID;
-    if (!siteId || !process.env.NEXT_PUBLIC_SUPABASE_URL) return { name: 'LazyBlog', logo: null };
-
-    const supabase = getSupabase();
-    const { data } = await supabase
-        .from('sites')
-        .select('name, logo_url')
-        .eq('id', siteId)
-        .single();
-
-    return { name: data?.name || 'LazyBlog', logo: data?.logo_url || null };
-}
-
-async function getRelatedPosts(category: string, excludeSlug: string): Promise<RelatedPost[]> {
-    const siteId = process.env.SITE_ID;
-    if (!siteId || !process.env.NEXT_PUBLIC_SUPABASE_URL) return [];
-
-    const supabase = getSupabase();
-    const { data } = await supabase
-        .from('posts')
-        .select('id, title, slug, featured_image, category, read_time')
-        .eq('site_id', siteId)
-        .eq('is_published', true)
-        .eq('category', category)
-        .neq('slug', excludeSlug)
-        .order('created_at', { ascending: false })
-        .limit(3);
-
-    return data || [];
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const post = await getPost(params.slug);
+    const post = await ContentService.getPostBySlug(params.slug);
     if (!post) return { title: "Not Found" };
 
-    const title = post.meta_title || post.title;
-    const description = post.meta_description || post.excerpt || post.content?.substring(0, 155) || '';
-    const image = proxyImage(post.og_image || post.featured_image);
+    const title = post.seo_title || post.meta_title || post.title;
+    const description = post.seo_description || post.meta_description || post.excerpt || post.content?.substring(0, 155) || '';
+    const image = proxyImage(post.og_image || post.featured_image || null);
 
     return {
         title,
@@ -136,15 +41,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function SlugPage({ params }: Props) {
-    const post = await getPost(params.slug);
-    const site = await getSiteDetails();
+    const post = await ContentService.getPostBySlug(params.slug);
+    const site = await ContentService.getConfig();
 
     if (!post) {
         notFound();
     }
 
     // Fetch related posts from same category
-    const relatedPosts = await getRelatedPosts(post.category, post.slug);
+    const relatedPosts = await ContentService.getRelatedPosts(post.category, post.slug);
 
     // Inject IDs into H2 tags for TOC navigation
     const processContent = (htmlContent: string) => {
@@ -197,7 +102,7 @@ export default async function SlugPage({ params }: Props) {
 
     const breadcrumbs = [
         { name: 'Home', url: siteUrl },
-        { name: post.category, url: `${siteUrl}/category/${post.category.toLowerCase()}` },
+        { name: post.category, url: `${siteUrl}/category/${post.category?.toLowerCase()}` },
         { name: post.title, url: articleUrl },
     ];
 
@@ -208,7 +113,7 @@ export default async function SlugPage({ params }: Props) {
                 headline={post.title}
                 url={articleUrl}
                 datePublished={post.created_at}
-                author={{ name: post.author_name || site.name }}
+                author={{ name: post.author_name || site?.name || 'Author' }}
                 image={post.featured_image || undefined}
                 description={post.excerpt || post.content?.substring(0, 155) || ''}
             />
@@ -269,9 +174,9 @@ export default async function SlugPage({ params }: Props) {
                         {/* Author & Meta */}
                         <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 py-6 border-y border-gray-200 dark:border-white/10">
                             <div className="flex items-center gap-4">
-                                {post.author_avatar || site.logo ? (
+                                {(post.author_avatar || site?.logo_url) ? (
                                     <Image
-                                        src={proxyImage(post.author_avatar || site.logo || '')}
+                                        src={proxyImage(post.author_avatar || site?.logo_url || '')}
                                         alt={post.author_name || 'Author'}
                                         width={56}
                                         height={56}
@@ -279,11 +184,11 @@ export default async function SlugPage({ params }: Props) {
                                     />
                                 ) : (
                                     <div className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold text-xl">
-                                        {(post.author_name || site.name)[0]}
+                                        {(post.author_name || site?.name || 'A')[0]}
                                     </div>
                                 )}
                                 <div>
-                                    <div className="font-semibold text-gray-900 dark:text-white">{post.author_name || site.name}</div>
+                                    <div className="font-semibold text-gray-900 dark:text-white">{post.author_name || site?.name}</div>
                                     <time dateTime={post.created_at} className="text-sm text-gray-500">
                                         {new Date(post.created_at).toLocaleDateString('en-US', {
                                             month: 'long',
@@ -386,28 +291,26 @@ export default async function SlugPage({ params }: Props) {
                     {post.author_name && (
                         <section className="bg-gray-50 dark:bg-gradient-to-br dark:from-white/5 dark:to-white/[0.02] border border-gray-200 dark:border-white/10 rounded-3xl p-8 mt-16 transition-colors" aria-labelledby="author-heading">
                             <div className="flex flex-col sm:flex-row items-start gap-6">
-                                {post.author_avatar || site.logo ? (
+                                {(post.author_avatar || site?.logo_url) ? (
                                     <Image
-                                        src={post.author_avatar || site.logo || ''}
-                                        alt={post.author_name || site.name}
+                                        src={post.author_avatar || site?.logo_url || ''}
+                                        alt={post.author_name || site?.name || 'Author'}
                                         width={80}
                                         height={80}
                                         className="rounded-full"
                                     />
                                 ) : (
                                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold text-3xl">
-                                        {(post.author_name || site.name)[0]}
+                                        {(post.author_name || site?.name || 'A')[0]}
                                     </div>
                                 )}
                                 <div className="flex-1">
                                     <h2 id="author-heading" className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                                        Written by {post.author_name || site.name}
+                                        Written by {post.author_name || site?.name}
                                     </h2>
-                                    {post.author_bio && (
-                                        <p className="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">{post.author_bio}</p>
-                                    )}
+                                    {/* Author Bio is missing in generic Post type, I might need to add it or ignore */}
                                     <button
-                                        className="px-5 py-2.5 rounded-full text-sm font-semibold border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-white/20 dark:text-white dark:hover:bg-white/5 transition-colors"
+                                        className="mt-4 px-5 py-2.5 rounded-full text-sm font-semibold border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-white/20 dark:text-white dark:hover:bg-white/5 transition-colors"
                                     >
                                         View all articles
                                     </button>

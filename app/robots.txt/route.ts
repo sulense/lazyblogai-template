@@ -1,49 +1,28 @@
-import { createClient } from '@supabase/supabase-js';
-
-function getSupabase() {
-    return createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
-}
+import { ContentService } from '@/lib/api';
 
 export async function GET() {
-    const siteId = process.env.SITE_ID;
+    const siteConfig = await ContentService.getConfig();
 
-    if (!siteId || !process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    if (!siteConfig) {
         // Default robots.txt for demo/build mode
         return new Response(`User-agent: *
 Allow: /
 `, { headers: { 'Content-Type': 'text/plain' } });
     }
 
-    const supabase = getSupabase();
+    const simpleSiteUrl = siteConfig.custom_domain
+        ? `https://${siteConfig.custom_domain}`
+        : `https://${siteConfig.slug}-blog.vercel.app`;
 
-    // Fetch SEO settings from database
-    const { data: seo } = await supabase
-        .from('site_seo_settings')
-        .select('robots_txt')
-        .eq('site_id', siteId)
-        .single();
-
-    // Get site URL for sitemap reference
-    const { data: site } = await supabase
-        .from('sites')
-        .select('slug, custom_domain')
-        .eq('id', siteId)
-        .single();
-
-    const siteUrl = site?.custom_domain
-        ? `https://${site.custom_domain}`
-        : `https://${site?.slug}-blog.vercel.app`;
+    const seo = siteConfig.site_seo_settings;
 
     let robotsTxt = seo?.robots_txt || `User-agent: *
 Allow: /
 
-Sitemap: ${siteUrl}/sitemap.xml`;
+Sitemap: ${simpleSiteUrl}/sitemap.xml`;
 
     // Replace placeholder
-    robotsTxt = robotsTxt.replace(/\{\{SITE_URL\}\}/g, siteUrl);
+    robotsTxt = robotsTxt.replace(/\{\{SITE_URL\}\}/g, simpleSiteUrl);
 
     return new Response(robotsTxt, {
         headers: { 'Content-Type': 'text/plain' },

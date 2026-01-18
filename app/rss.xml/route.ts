@@ -1,11 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-
-function getSupabase() {
-    return createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
-}
+import { ContentService } from '@/lib/api';
 
 function escapeXml(text: string): string {
     return text
@@ -17,9 +10,9 @@ function escapeXml(text: string): string {
 }
 
 export async function GET() {
-    const siteId = process.env.SITE_ID;
+    const siteConfig = await ContentService.getConfig();
 
-    if (!siteId || !process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    if (!siteConfig) {
         // Default RSS for demo/build mode
         return new Response(`<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
@@ -31,39 +24,19 @@ export async function GET() {
 </rss>`, { headers: { 'Content-Type': 'application/rss+xml; charset=utf-8' } });
     }
 
-    const supabase = getSupabase();
-
-    // Get site info and SEO settings
-    const [{ data: site }, { data: seo }, { data: posts }] = await Promise.all([
-        supabase
-            .from('sites')
-            .select('name, slug, custom_domain')
-            .eq('id', siteId)
-            .single(),
-        supabase
-            .from('site_seo_settings')
-            .select('site_name, meta_description, rss_title, rss_description, enable_rss, org_logo_url')
-            .eq('site_id', siteId)
-            .single(),
-        supabase
-            .from('posts')
-            .select('title, slug, excerpt, category, author_name, created_at, featured_image')
-            .eq('site_id', siteId)
-            .eq('is_published', true)
-            .order('created_at', { ascending: false })
-            .limit(50)
-    ]);
+    const { data: posts } = (await ContentService.getPosts(1, 50)) || { data: [] };
+    const seo = siteConfig.site_seo_settings;
 
     // Check if RSS is disabled
     if (seo?.enable_rss === false) {
         return new Response('RSS feed is disabled', { status: 404 });
     }
 
-    const siteUrl = site?.custom_domain
-        ? `https://${site.custom_domain}`
-        : `https://${site?.slug || 'demo'}-blog.vercel.app`;
+    const simpleSiteUrl = siteConfig.custom_domain
+        ? `https://${siteConfig.custom_domain}`
+        : `https://${siteConfig.slug}-blog.vercel.app`;
 
-    const feedTitle = escapeXml(seo?.rss_title || seo?.site_name || site?.name || 'Blog');
+    const feedTitle = escapeXml(seo?.rss_title || seo?.site_name || siteConfig.name || 'Blog');
     const feedDescription = escapeXml(seo?.rss_description || seo?.meta_description || 'Latest articles and updates');
     const feedImage = seo?.org_logo_url || '';
     const now = new Date().toUTCString();
@@ -72,11 +45,11 @@ export async function GET() {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
     <channel>
         <title>${feedTitle}</title>
-        <link>${siteUrl}</link>
+        <link>${simpleSiteUrl}</link>
         <description>${feedDescription}</description>
         <language>en-us</language>
         <lastBuildDate>${now}</lastBuildDate>
-        <atom:link href="${siteUrl}/rss.xml" rel="self" type="application/rss+xml"/>
+        <atom:link href="${simpleSiteUrl}/rss.xml" rel="self" type="application/rss+xml"/>
         <generator>LazyBlog AI</generator>`;
 
     // Add channel image if available
@@ -85,14 +58,14 @@ export async function GET() {
         <image>
             <url>${escapeXml(feedImage)}</url>
             <title>${feedTitle}</title>
-            <link>${siteUrl}</link>
+            <link>${simpleSiteUrl}</link>
         </image>`;
     }
 
     // Add posts as items
     if (posts && posts.length > 0) {
         for (const post of posts) {
-            const postUrl = `${siteUrl}/${post.slug}`;
+            const postUrl = `${simpleSiteUrl}/${post.slug}`;
             const pubDate = new Date(post.created_at).toUTCString();
             const title = escapeXml(post.title || 'Untitled');
             const description = escapeXml(post.excerpt || '');

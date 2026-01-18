@@ -1,16 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
-
-function getSupabase() {
-    return createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
-}
+import { ContentService } from '@/lib/api';
 
 export async function GET() {
-    const siteId = process.env.SITE_ID;
+    const siteConfig = await ContentService.getConfig();
 
-    if (!siteId || !process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    if (!siteConfig) {
         // Default sitemap for demo/build mode
         return new Response(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -20,27 +13,11 @@ export async function GET() {
 </urlset>`, { headers: { 'Content-Type': 'application/xml' } });
     }
 
-    const supabase = getSupabase();
+    const siteUrl = siteConfig.custom_domain
+        ? `https://${siteConfig.custom_domain}`
+        : `https://${siteConfig.slug || 'demo'}-blog.vercel.app`;
 
-    // Get site info
-    const { data: site } = await supabase
-        .from('sites')
-        .select('slug, custom_domain')
-        .eq('id', siteId)
-        .single();
-
-    const siteUrl = site?.custom_domain
-        ? `https://${site.custom_domain}`
-        : `https://${site?.slug || 'demo'}-blog.vercel.app`;
-
-    // Get all published posts
-    const { data: posts } = await supabase
-        .from('posts')
-        .select('slug, created_at')
-        .eq('site_id', siteId)
-        .eq('is_published', true)
-        .order('created_at', { ascending: false });
-
+    const posts = await ContentService.getSitemapPaths();
     const now = new Date().toISOString();
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -52,7 +29,6 @@ export async function GET() {
         <priority>1.0</priority>
     </url>`;
 
-    // Add all posts
     if (posts) {
         for (const post of posts) {
             xml += `

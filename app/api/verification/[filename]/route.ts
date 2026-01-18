@@ -1,13 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-// This route serves the Google Site Verification file
-// URL pattern: /api/verification/googleXXXXXXXXXXXX.html
-// Rewritten from: /googleXXXXXXXXXXXX.html
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const siteId = process.env.SITE_ID;
+import { ContentService } from '@/lib/api';
 
 export async function GET(
     request: Request,
@@ -15,35 +7,24 @@ export async function GET(
 ) {
     const filename = params.filename;
 
-    // Validate it looks like a Google verification file
     if (!filename.startsWith('google') || !filename.endsWith('.html')) {
         return new NextResponse('Not Found', { status: 404 });
     }
 
-    // Get the site's verification ID
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const siteConfig = await ContentService.getConfig();
 
-    const { data: site } = await supabase
-        .from('sites')
-        .select('google_site_verification_id')
-        .eq('id', siteId)
-        .single();
+    // @ts-ignore - google_site_verification_id might not be in interface yet, I need to update interface
+    const expectedFilename = siteConfig?.google_site_verification_id;
 
-    // Check if this matches the expected verification file
-    if (!site?.google_site_verification_id) {
+    if (!expectedFilename) {
         return new NextResponse('Verification not configured', { status: 404 });
     }
-
-    const expectedFilename = site.google_site_verification_id;
 
     if (filename !== expectedFilename) {
         console.log(`Verification file mismatch: expected ${expectedFilename}, got ${filename}`);
         return new NextResponse('Not Found', { status: 404 });
     }
 
-    // Return the verification content
-    // For FILE verification, the file should contain: google-site-verification: TOKEN
-    const token = filename.replace('.html', '').replace('google', '');
     const content = `google-site-verification: ${filename.replace('.html', '')}`;
 
     return new NextResponse(content, {

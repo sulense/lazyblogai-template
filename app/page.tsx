@@ -1,69 +1,26 @@
 import Link from "next/link";
 import Image from "next/image";
-import { createClient } from "@supabase/supabase-js";
+import { ContentService, Post } from "@/lib/api";
+import { Pagination } from "../components/pagination";
 
 export const revalidate = 60; // Revalidate every minute
 
-function getSupabase() {
-    return createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
-}
-
-interface Post {
-    id: string;
-    title: string;
-    slug: string;
-    excerpt: string | null;
-    featured_image: string | null;
-    category: string;
-    read_time: string;
-    author_name: string | null;
-    author_avatar: string | null;
-    created_at: string;
-    is_published: boolean;
-}
-
-import { Pagination } from "../components/pagination";
-
 export default async function Page({ searchParams }: { searchParams: { page?: string } }) {
     const siteId = process.env.SITE_ID;
-    const isDemo = !siteId || !process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const isDemo = !siteId;
     const page = parseInt(searchParams.page || '1');
     const pageSize = 9;
-    const from = (page - 1) * pageSize;
-    const to = from + pageSize - 1;
 
     let posts: Post[] = [];
     let count = 0;
 
     if (!isDemo) {
-        const supabase = getSupabase();
-
-        // Get total count
-        const { count: totalCount } = await supabase
-            .from('posts')
-            .select('*', { count: 'exact', head: true })
-            .eq('site_id', siteId)
-            .eq('is_published', true);
-
-        count = totalCount || 0;
-
-        // Get paginated posts
-        const { data, error } = await supabase
-            .from('posts')
-            .select('id, title, slug, excerpt, featured_image, category, read_time, author_name, author_avatar, created_at, is_published')
-            .eq('site_id', siteId)
-            .eq('is_published', true)
-            .order('created_at', { ascending: false })
-            .range(from, to);
-
-        if (!error && data) {
-            posts = data;
+        const res = await ContentService.getPosts(page, pageSize);
+        if (res) {
+            posts = res.data;
+            count = res.meta.total;
         }
     } else {
-
         // Demo posts for preview mode
         posts = [
             {
@@ -77,7 +34,6 @@ export default async function Page({ searchParams }: { searchParams: { page?: st
                 author_name: 'Alex Johnson',
                 author_avatar: null,
                 created_at: new Date().toISOString(),
-                is_published: true,
             },
             {
                 id: 'demo-2',
@@ -90,7 +46,6 @@ export default async function Page({ searchParams }: { searchParams: { page?: st
                 author_name: 'Sarah Chen',
                 author_avatar: null,
                 created_at: new Date(Date.now() - 86400000).toISOString(),
-                is_published: true,
             },
             {
                 id: 'demo-3',
@@ -103,7 +58,6 @@ export default async function Page({ searchParams }: { searchParams: { page?: st
                 author_name: 'Mike Wilson',
                 author_avatar: null,
                 created_at: new Date(Date.now() - 172800000).toISOString(),
-                is_published: true,
             },
             {
                 id: 'demo-4',
@@ -116,7 +70,6 @@ export default async function Page({ searchParams }: { searchParams: { page?: st
                 author_name: 'Emma Davis',
                 author_avatar: null,
                 created_at: new Date(Date.now() - 259200000).toISOString(),
-                is_published: true,
             },
             {
                 id: 'demo-5',
@@ -129,7 +82,6 @@ export default async function Page({ searchParams }: { searchParams: { page?: st
                 author_name: 'Dr. James Lee',
                 author_avatar: null,
                 created_at: new Date(Date.now() - 345600000).toISOString(),
-                is_published: true,
             },
             {
                 id: 'demo-6',
@@ -142,7 +94,6 @@ export default async function Page({ searchParams }: { searchParams: { page?: st
                 author_name: 'Lisa Park',
                 author_avatar: null,
                 created_at: new Date(Date.now() - 432000000).toISOString(),
-                is_published: true,
             },
         ];
         count = posts.length;
