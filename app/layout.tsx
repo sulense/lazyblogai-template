@@ -34,7 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
         : `https://${site?.slug || 'demo'}-blog.vercel.app`;
 
     return {
-        title: seo?.meta_title || site?.name || "Niche Blog",
+        title: seo?.site_name || site?.name || "Niche Blog",
         description: seo?.meta_description || "A generated niche blog site",
         metadataBase: new URL(siteUrl),
         alternates: {
@@ -46,7 +46,7 @@ export async function generateMetadata(): Promise<Metadata> {
             },
         },
         openGraph: {
-            title: seo?.meta_title || site?.name || "Niche Blog",
+            title: seo?.site_name || site?.name || "Niche Blog",
             description: seo?.meta_description || "A generated niche blog site",
             url: siteUrl,
             siteName: seo?.site_name || site?.name || "Niche Blog",
@@ -55,7 +55,7 @@ export async function generateMetadata(): Promise<Metadata> {
         },
         twitter: {
             card: (seo?.twitter_card as "summary_large_image" | "summary") || "summary_large_image",
-            title: seo?.meta_title || site?.name || "Niche Blog",
+            title: seo?.site_name || site?.name || "Niche Blog",
             description: seo?.meta_description || "A generated niche blog site",
             images: seo?.og_image_url ? [seo.og_image_url] : [],
             creator: seo?.twitter_handle,
