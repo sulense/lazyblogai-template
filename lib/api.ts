@@ -1,4 +1,4 @@
-export const BRAIN_API_URL = process.env.NEXT_PUBLIC_BRAIN_API_URL || 'https://app.lazyblog.ai';
+export const BRAIN_API_URL = process.env.NEXT_PUBLIC_BRAIN_API_URL || 'https://www.lazyblogai.com';
 export const SITE_ID = process.env.SITE_ID;
 
 if (!SITE_ID && process.env.NODE_ENV === 'production') {
