@@ -201,72 +201,7 @@ export default async function AboutPage() {
                 </section>
             )}
 
-            {/* ═══════════════════════════════════════════════════════════════════
-                PERSONALITY
-            ═══════════════════════════════════════════════════════════════════ */}
-            {(personality.traits.length > 0 || personality.quirks.length > 0) && (
-                <section className="relative px-6 py-20">
-                    <div className="max-w-4xl mx-auto">
-                        <div className="flex items-center gap-4 mb-10">
-                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                            <span className="text-xs text-gray-500 uppercase tracking-[0.3em]">{personality.title}</span>
-                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            {/* Traits */}
-                            {personality.traits.length > 0 && (
-                                <div>
-                                    <h3 className="text-lg font-semibold mb-4" style={{ color: primaryColor }}>Core Traits</h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {personality.traits.map((trait, i) => (
-                                            <span key={i} className="px-4 py-2 rounded-full text-sm" style={{ backgroundColor: `${primaryColor}1A`, borderColor: `${primaryColor}4D`, color: primaryColor, border: '1px solid' }}>
-                                                {trait}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Humor */}
-                            {personality.humor && (
-                                <div>
-                                    <h3 className="text-lg font-semibold text-purple-400 mb-4">Sense of Humor</h3>
-                                    <p className="text-gray-400">{personality.humor}</p>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Quirks */}
-                        {personality.quirks.length > 0 && (
-                            <div className="mt-8">
-                                <h3 className="text-lg font-semibold text-cyan-400 mb-4">Fun Quirks</h3>
-                                <ul className="space-y-3 text-gray-400">
-                                    {personality.quirks.map((quirk, i) => (
-                                        <li key={i} className="flex items-start gap-3">
-                                            <span className="text-cyan-400">✨</span> {quirk}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-
-                        {/* Pet Peeves */}
-                        {personality.petPeeves.length > 0 && (
-                            <div className="mt-8">
-                                <h3 className="text-lg font-semibold text-red-400 mb-4">Pet Peeves</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {personality.petPeeves.map((peeve, i) => (
-                                        <span key={i} className="px-4 py-2 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
-                                            🚫 {peeve}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </section>
-            )}
 
             {/* ═══════════════════════════════════════════════════════════════════
                 COMMUNITY
