@@ -67,6 +67,111 @@ export interface SiteSeoSettings {
     org_name: string | null;
 }
 
+export interface PersonaVoice {
+    openingStyle?: string;
+    writingStyle?: string;
+    neverUseWords?: string[];
+    alwaysUseWords?: string[];
+    toneDescription?: string;
+    exampleSentences?: string[];
+    sentenceStructure?: string;
+}
+
+export interface PersonaIdentity {
+    age?: string;
+    name?: string;
+    title?: string;
+    location?: string;
+    avatarStyle?: string;
+    avatarUrl?: string;
+    livingSpace?: string;
+}
+
+export interface PersonaLifeStory {
+    biggestWin?: string;
+    credentials?: string[];
+    originMoment?: string;
+    turningPoint?: string;
+    yearsInNiche?: number;
+    biggestFailure?: string;
+    previousCareer?: string;
+}
+
+export interface PersonaPersonality {
+    humor?: string;
+    quirks?: string[];
+    traits?: string[];
+    petPeeves?: string[];
+    catchphrase?: string;
+}
+
+export interface PersonaCommunityPresence {
+    communities?: string[];
+}
+
+export interface PersonaContentSignatures {
+    callToAction?: string;
+    typicalOpener?: string;
+    howTheyProvePoints?: string;
+}
+
+export interface Persona {
+    voice?: PersonaVoice;
+    identity?: PersonaIdentity;
+    lifeStory?: PersonaLifeStory;
+    personality?: PersonaPersonality;
+    transparency?: string;
+    communityPresence?: PersonaCommunityPresence;
+    contentSignatures?: PersonaContentSignatures;
+}
+
+export interface AboutPageContent {
+    hero: {
+        headline: string;
+        title: string;
+        avatarUrl: string | null;
+        location: string | null;
+        yearsExperience: number | null;
+        tagline: string | null;
+        credentials: string[];
+    };
+    catchphrase: {
+        quote: string | null;
+    };
+    originStory: {
+        title: string;
+        narrative: string;
+    };
+    winsAndLessons: {
+        win: { title: string; content: string } | null;
+        lesson: { title: string; content: string } | null;
+    };
+    personality: {
+        title: string;
+        traits: string[];
+        humor: string | null;
+        quirks: string[];
+        petPeeves: string[];
+    };
+    community: {
+        title: string;
+        platforms: string[];
+    };
+    cta: {
+        opener: string | null;
+        headline: string;
+        buttonText: string;
+    };
+    footer: {
+        transparency: string | null;
+    };
+    seoMeta: {
+        title: string;
+        description: string;
+        keywords: string[];
+    };
+}
+
 export interface SiteConfig {
     name: string;
     slug: string;
@@ -75,6 +180,8 @@ export interface SiteConfig {
     font_family: string;
     logo_url: string | null;
     description: string | null;
+    persona?: Persona | null;
+    about_page_content?: AboutPageContent | null;
     google_site_verification_id?: string | null;
     site_seo_settings?: SiteSeoSettings;
 }
