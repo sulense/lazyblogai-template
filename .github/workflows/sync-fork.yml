@@ -1,4 +1,4 @@
-name: Sync Fork with Upstream Template
+name: Sync
 
 on:
   schedule:
