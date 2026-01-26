@@ -202,6 +202,18 @@ export interface Post {
     seo_description?: string;
 }
 
+export interface Page {
+    id: string;
+    title: string;
+    slug: string;
+    page_type: string;
+    sections: any[];
+    meta_title?: string;
+    meta_description?: string;
+    is_published: boolean;
+    updated_at: string;
+}
+
 export interface PostListResponse {
     data: Post[];
     meta: {
@@ -230,6 +242,10 @@ export const ContentService = {
 
     async getPostBySlug(slug: string): Promise<Post | null> {
         return fetchBrain<Post>(`posts/${slug}`);
+    },
+
+    async getPageBySlug(slug: string): Promise<Page | null> {
+        return fetchBrain<Page>(`pages/${slug}`);
     },
 
     async getRelatedPosts(category: string, excludeSlug: string, limit = 3): Promise<Post[]> {

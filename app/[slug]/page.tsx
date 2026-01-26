@@ -5,6 +5,7 @@ import { ContentService } from "@/lib/api";
 import { ArticleSchema, BreadcrumbSchema } from "../../components/structured-data";
 import { Metadata } from "next";
 import { proxyImage, proxyContentImages } from "@/lib/image-proxy";
+import { renderSections } from "../../components/sections";
 
 export const revalidate = 60;
 
@@ -14,7 +15,17 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const post = await ContentService.getPostBySlug(params.slug);
-    if (!post) return { title: "Not Found" };
+
+    if (!post) {
+        const page = await ContentService.getPageBySlug(params.slug);
+        if (page) {
+            return {
+                title: page.meta_title || page.title,
+                description: page.meta_description || `Page about ${page.title}`,
+            };
+        }
+        return { title: "Not Found" };
+    }
 
     const title = post.seo_title || post.title;
     const description = post.seo_description || post.excerpt || post.content?.substring(0, 155) || '';
@@ -45,6 +56,17 @@ export default async function SlugPage({ params }: Props) {
     const site = await ContentService.getConfig();
 
     if (!post) {
+        const page = await ContentService.getPageBySlug(params.slug);
+
+        if (page) {
+            return (
+                <main className="min-h-screen bg-white dark:bg-[#0a0a0b]">
+                    {/* Page Content (Sections) */}
+                    {renderSections(page.sections)}
+                </main>
+            );
+        }
+
         notFound();
     }
 
