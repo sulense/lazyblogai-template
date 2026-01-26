@@ -311,7 +311,7 @@ export default async function SlugPage({ params }: Props) {
 
                     {/* Author Box */}
                     {post.author_name && (
-                        <section className="bg-gray-50 dark:bg-gradient-to-br dark:from-white/5 dark:to-white/[0.02] border border-gray-200 dark:border-white/10 rounded-3xl p-8 mt-16 transition-colors" aria-labelledby="author-heading">
+                        <section className="bg-gray-50 dark:bg-transparent dark:bg-gradient-to-br dark:from-white/5 dark:to-white/[0.02] border border-gray-200 dark:border-white/10 rounded-3xl p-8 mt-16 transition-colors" aria-labelledby="author-heading">
                             <div className="flex flex-col sm:flex-row items-start gap-6">
                                 {(post.author_avatar || site?.logo_url) ? (
                                     <Image

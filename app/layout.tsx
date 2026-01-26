@@ -234,27 +234,48 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                 {/* Footer */}
                 <footer className="border-t border-gray-200 dark:border-white/10 mt-auto bg-white/50 dark:bg-black/30 backdrop-blur-md transition-colors" role="contentinfo">
                     <div className="max-w-7xl mx-auto px-6 py-12">
-                        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-                            <div className="flex items-center gap-3">
-                                {logoUrl ? (
-                                    <img
-                                        src={logoUrl}
-                                        alt={siteName}
-                                        className="w-8 h-8 rounded-lg object-cover"
-                                    />
-                                ) : (
-                                    <div
-                                        className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                        style={{ background: primaryColor }}
-                                    >
-                                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                        </svg>
-                                    </div>
-                                )}
-                                <span className="font-bold text-gray-900 dark:text-white text-lg transition-colors">{siteName}</span>
+                        <div className="flex flex-col gap-8">
+                            {/* Top Row: Logo & Navigation Links */}
+                            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                                <div className="flex items-center gap-3">
+                                    {logoUrl ? (
+                                        <img
+                                            src={logoUrl}
+                                            alt={siteName}
+                                            className="w-8 h-8 rounded-lg object-cover"
+                                        />
+                                    ) : (
+                                        <div
+                                            className="w-8 h-8 rounded-lg flex items-center justify-center"
+                                            style={{ background: primaryColor }}
+                                        >
+                                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                            </svg>
+                                        </div>
+                                    )}
+                                    <span className="font-bold text-gray-900 dark:text-white text-lg transition-colors">{siteName}</span>
+                                </div>
+
+                                {/* Footer Navigation Links */}
+                                <nav className="flex flex-wrap justify-center gap-6 text-sm" aria-label="Footer navigation">
+                                    <a href="/about" className="text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+                                        About
+                                    </a>
+                                    <a href="/privacy" className="text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+                                        Privacy Policy
+                                    </a>
+                                    <a href="/terms" className="text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+                                        Terms of Service
+                                    </a>
+                                    <a href="/disclaimer" className="text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+                                        Disclaimer
+                                    </a>
+                                </nav>
                             </div>
-                            <div className="text-sm text-gray-400 flex flex-col sm:flex-row sm:items-center gap-2">
+
+                            {/* Bottom Row: Copyright & Powered By */}
+                            <div className="flex flex-col sm:flex-row justify-center items-center gap-2 text-sm text-gray-400 border-t border-gray-200 dark:border-white/5 pt-6">
                                 <span>&copy; {new Date().getFullYear()} {siteName}. All rights reserved.</span>
                                 <span className="hidden sm:inline text-gray-600">•</span>
                                 <a
